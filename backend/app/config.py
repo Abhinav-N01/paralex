@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # ── App ──────────────────────────────────────────────────────────────────
     app_name: str = "ParaLex"
     environment: Literal["development", "production"] = "development"
-    debug: bool = True
+    debug: bool = False   # set DEBUG=true in .env to enable SQLAlchemy query logs
     secret_key: str = "change-me-in-production-please"
 
     # ── Anthropic ────────────────────────────────────────────────────────────

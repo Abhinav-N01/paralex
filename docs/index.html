@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParaLex — AI Paralegal for EB-5 Investor Visa Filings</title>
+  <meta name="description" content="ParaLex automates the paralegal work behind EB-5 investor visa petitions — verifying legal source of funds, tracing fund paths, flagging document gaps, and drafting USCIS memos. All answers grounded in the client's own documents." />
+  <meta property="og:title" content="ParaLex — AI Paralegal for EB-5 Filings" />
+  <meta property="og:description" content="Upload client documents. Get a grounded gap analysis and a fully-cited Source of Funds memo in minutes." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #0a1628;
+      --navy-2:  #0f2044;
+      --navy-3:  #1a3260;
+      --gold:    #f5a623;
+      --gold-2:  #fbbf24;
+      --blue:    #3b82f6;
+      --blue-2:  #60a5fa;
+      --green:   #22c55e;
+      --red:     #ef4444;
+      --amber:   #f59e0b;
+      --white:   #ffffff;
+      --gray-50: #f8fafc;
+      --gray-100:#f1f5f9;
+      --gray-200:#e2e8f0;
+      --gray-400:#94a3b8;
+      --gray-500:#64748b;
+      --gray-600:#475569;
+      --gray-700:#334155;
+      --gray-900:#0f172a;
+      --radius:  12px;
+      --shadow:  0 4px 24px rgba(0,0,0,.10);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,.18);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--gray-700); line-height: 1.6; }
+
+    /* ── Utilities ─────────────────────────────────────── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+    .tag-gold  { background: rgba(245,166,35,.15); color: var(--gold); border: 1px solid rgba(245,166,35,.3); }
+    .tag-blue  { background: rgba(59,130,246,.12); color: var(--blue); border: 1px solid rgba(59,130,246,.25); }
+    .tag-green { background: rgba(34,197,94,.12);  color: var(--green); border: 1px solid rgba(34,197,94,.25); }
+    .badge-present { background: rgba(34,197,94,.12);  color: #16a34a; }
+    .badge-missing { background: rgba(239,68,68,.10);  color: #dc2626; }
+    .badge-warn    { background: rgba(245,158,11,.12); color: #b45309; }
+
+    /* ── Nav ───────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,22,40,.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; max-width: 1100px; margin: 0 auto;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon {
+      width: 36px; height: 36px; background: var(--gold);
+      border-radius: 9px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo-text { font-size: 20px; font-weight: 800; color: var(--white); }
+    .logo-sub  { font-size: 11px; color: rgba(255,255,255,.45); font-weight: 400; display: block; line-height: 1; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link { color: rgba(255,255,255,.65); text-decoration: none; font-size: 14px; padding: 6px 14px; border-radius: 8px; transition: all .2s; }
+    .nav-link:hover { color: var(--white); background: rgba(255,255,255,.08); }
+    .btn-nav {
+      background: var(--gold); color: var(--navy); font-weight: 700; font-size: 13px;
+      padding: 8px 18px; border-radius: 9px; text-decoration: none;
+      transition: all .2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-nav:hover { background: var(--gold-2); transform: translateY(-1px); }
+
+    /* ── Hero ──────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 50%, #0d1b3e 100%);
+      padding: 90px 0 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 800px 600px at 70% 50%, rgba(59,130,246,.07) 0%, transparent 70%);
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; position: relative; z-index: 1; }
+    .hero-eyebrow { margin-bottom: 18px; }
+    .hero-title { font-size: 46px; font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 20px; }
+    .hero-title span { color: var(--gold); }
+    .hero-desc { font-size: 17px; color: rgba(255,255,255,.65); margin-bottom: 36px; line-height: 1.7; }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--gold); color: var(--navy); font-weight: 700; font-size: 15px;
+      padding: 13px 28px; border-radius: 10px; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all .2s; box-shadow: 0 4px 20px rgba(245,166,35,.35);
+    }
+    .btn-primary:hover { background: var(--gold-2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,166,35,.45); }
+    .btn-outline {
+      border: 1.5px solid rgba(255,255,255,.25); color: var(--white); font-weight: 600; font-size: 15px;
+      padding: 13px 28px; border-radius: 10px; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all .2s;
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.06); }
+
+    /* hero UI mockup */
+    .hero-mockup {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .mockup-bar {
+      background: rgba(255,255,255,.06);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-title { color: rgba(255,255,255,.5); font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-left: 4px; }
+    .mockup-tabs { display: flex; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .mockup-tab {
+      padding: 10px 14px; font-size: 12px; color: rgba(255,255,255,.4);
+      border-bottom: 2px solid transparent; cursor: default;
+    }
+    .mockup-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .mockup-body { padding: 16px; }
+
+    /* ── Problem/Solution ──────────────────────────────── */
+    .section { padding: 80px 0; }
+    .section-alt { background: var(--gray-50); }
+    .section-dark { background: var(--navy); }
+    .section-title { font-size: 34px; font-weight: 800; color: var(--gray-900); margin-bottom: 12px; line-height: 1.2; }
+    .section-title.light { color: var(--white); }
+    .section-sub { font-size: 17px; color: var(--gray-500); max-width: 580px; }
+    .section-sub.light { color: rgba(255,255,255,.6); }
+    .section-header { margin-bottom: 52px; }
+
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+    .problem-list { list-style: none; }
+    .problem-list li {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 16px 0; border-bottom: 1px solid var(--gray-200);
+    }
+    .problem-list li:last-child { border: none; }
+    .problem-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .problem-text h4 { font-size: 15px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
+    .problem-text p  { font-size: 14px; color: var(--gray-500); }
+
+    .solution-card {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--radius); padding: 24px; display: flex; gap: 16px;
+      box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s;
+    }
+    .solution-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+    .solution-icon-wrap {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .solution-card h4 { font-size: 15px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
+    .solution-card p  { font-size: 14px; color: var(--gray-500); line-height: 1.55; }
+
+    /* ── How it works ──────────────────────────────────── */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
+    .steps::before {
+      content: ''; position: absolute; top: 32px; left: 10%; right: 10%; height: 2px;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--blue) 100%);
+      z-index: 0;
+    }
+    .step { text-align: center; position: relative; z-index: 1; }
+    .step-num {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin: 0 auto 16px;
+      border: 3px solid var(--white);
+      box-shadow: 0 0 0 3px rgba(245,166,35,.25);
+    }
+    .step h3 { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+    .step p  { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.55; }
+
+    /* ── Features deep dive ────────────────────────────── */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .feature-card {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--radius); padding: 28px;
+      transition: all .2s;
+    }
+    .feature-card:hover { border-color: rgba(59,130,246,.3); box-shadow: 0 6px 24px rgba(59,130,246,.08); transform: translateY(-2px); }
+    .feature-icon { font-size: 28px; margin-bottom: 14px; }
+    .feature-card h3 { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+    .feature-card p  { font-size: 14px; color: var(--gray-500); line-height: 1.6; }
+    .feature-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .f-tag { font-size: 11px; background: var(--gray-100); color: var(--gray-600); padding: 3px 10px; border-radius: 999px; }
+
+    /* ── UI Screenshots section ───────────────────────── */
+    .screenshots { display: flex; flex-direction: column; gap: 40px; }
+    .screenshot-row { display: grid; grid-template-columns: 1fr 1.3fr; gap: 48px; align-items: center; }
+    .screenshot-row.reverse { direction: rtl; }
+    .screenshot-row.reverse > * { direction: ltr; }
+    .screenshot-text h3 { font-size: 24px; font-weight: 700; color: var(--gray-900); margin-bottom: 12px; }
+    .screenshot-text p  { font-size: 15px; color: var(--gray-500); line-height: 1.7; margin-bottom: 16px; }
+    .screenshot-ui {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg);
+    }
+    .ui-header {
+      background: var(--gray-50); padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .ui-header-title { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+    .ui-body { padding: 16px; }
+
+    /* document row */
+    .doc-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .doc-row:last-child { border: none; }
+    .doc-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-spin  { background: var(--blue); }
+    .dot-red   { background: var(--red); }
+    .doc-name { flex: 1; font-size: 13px; color: var(--gray-700); font-weight: 500; }
+    .doc-cat  { font-size: 11px; background: rgba(59,130,246,.1); color: var(--blue); padding: 2px 8px; border-radius: 999px; }
+    .doc-pages { font-size: 11px; color: var(--gray-400); }
+
+    /* chat bubble */
+    .chat-bubble { border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; font-size: 13px; line-height: 1.6; }
+    .chat-user { background: #1d4ed8; color: var(--white); margin-left: 40px; }
+    .chat-ai   { background: var(--gray-50); border: 1px solid var(--gray-200); }
+    .chat-ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .chat-avatar { width: 24px; height: 24px; background: var(--navy); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .cite-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(59,130,246,.1); color: var(--blue);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 6px; padding: 1px 7px; font-size: 11px; font-weight: 500;
+      margin: 0 2px;
+    }
+
+    /* gap analysis */
+    .gap-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px;
+    }
+    .gap-item:last-child { border: none; }
+    .gap-check { font-size: 14px; width: 20px; text-align: center; }
+    .gap-label { flex: 1; color: var(--gray-700); }
+    .gap-file  { font-size: 11px; color: var(--gray-400); font-family: 'JetBrains Mono', monospace; }
+    .completeness-bar { background: var(--gray-100); border-radius: 999px; height: 8px; margin-bottom: 16px; overflow: hidden; }
+    .completeness-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--green) 0%, #16a34a 100%); }
+
+    /* memo */
+    .memo-section { margin-bottom: 12px; }
+    .memo-h2 { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+    .memo-p  { font-size: 12px; color: var(--gray-600); line-height: 1.6; }
+    .memo-cite {
+      font-size: 11px; color: var(--blue);
+      font-style: italic; border-left: 3px solid rgba(59,130,246,.3);
+      padding-left: 8px; margin-top: 4px;
+    }
+
+    /* ── Privacy strip ─────────────────────────────────── */
+    .privacy-strip {
+      background: var(--navy-2); border-top: 1px solid rgba(255,255,255,.06);
+      padding: 60px 0;
+    }
+    .privacy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .privacy-item { display: flex; gap: 16px; align-items: flex-start; }
+    .privacy-icon { font-size: 28px; flex-shrink: 0; }
+    .privacy-item h4 { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+    .privacy-item p  { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.55; }
+
+    /* ── Install ───────────────────────────────────────── */
+    .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .install-steps { counter-reset: step; }
+    .install-step {
+      display: flex; gap: 16px; padding: 20px 0;
+      border-bottom: 1px solid var(--gray-200);
+      counter-increment: step;
+    }
+    .install-step:last-child { border: none; }
+    .step-num-sm {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--navy); color: var(--white);
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .install-step h4 { font-size: 14px; font-weight: 600; color: var(--gray-900); margin-bottom: 6px; }
+    .install-step p  { font-size: 13px; color: var(--gray-500); margin-bottom: 8px; }
+    .code-block {
+      background: var(--gray-900); color: #a5f3fc;
+      border-radius: 8px; padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;
+      overflow-x: auto;
+    }
+    .code-block .dim { color: #64748b; }
+    .code-block .gold { color: var(--gold); }
+    .code-block .green { color: #86efac; }
+    .req-card {
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: var(--radius); padding: 24px;
+    }
+    .req-card h3 { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 16px; }
+    .req-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; color: var(--gray-700); padding: 8px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .req-item:last-child { border: none; }
+    .req-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: auto; }
+    .req-req  { background: rgba(239,68,68,.1); color: var(--red); }
+    .req-opt  { background: var(--gray-200); color: var(--gray-600); }
+
+    /* ── Stack ─────────────────────────────────────────── */
+    .stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stack-item {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px; padding: 20px 16px; text-align: center;
+      transition: all .2s;
+    }
+    .stack-item:hover { background: rgba(255,255,255,.08); border-color: rgba(245,166,35,.25); }
+    .stack-item .si { font-size: 28px; margin-bottom: 8px; }
+    .stack-item h4 { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+    .stack-item p  { font-size: 12px; color: rgba(255,255,255,.45); }
+
+    /* ── Footer ────────────────────────────────────────── */
+    footer {
+      background: var(--navy); border-top: 1px solid rgba(255,255,255,.06);
+      padding: 40px 0; text-align: center;
+    }
+    footer p { color: rgba(255,255,255,.35); font-size: 13px; }
+    footer a { color: var(--gold); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
+    .footer-links a { color: rgba(255,255,255,.5); font-size: 14px; text-decoration: none; }
+    .footer-links a:hover { color: var(--white); }
+
+    /* ── Responsive ────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero-grid, .problem-grid, .install-grid,
+      .screenshot-row, .screenshot-row.reverse { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .steps::before { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .privacy-grid, .stack-grid { grid-template-columns: 1fr 1fr; }
+      .hero-title { font-size: 32px; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 480px) {
+      .features-grid, .privacy-grid, .stack-grid, .steps { grid-template-columns: 1fr; }
+    }
+
+    /* ── Animations ────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .6s ease forwards; }
+    .fade-up-2 { animation: fadeUp .6s ease .15s forwards; opacity: 0; }
+    .fade-up-3 { animation: fadeUp .6s ease .3s forwards;  opacity: 0; }
+
+    @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+    .cursor::after { content: '▋'; animation: blink 1s step-end infinite; color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">⚖️</div>
+      <div>
+        <span class="logo-text">ParaLex</span>
+        <span class="logo-sub">EB-5 AI Paralegal</span>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#screenshots" class="nav-link">Screenshots</a>
+      <a href="#install" class="nav-link">Install</a>
+      <a href="https://github.com/YOUR_GITHUB/paralex" class="btn-nav" target="_blank">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow fade-up">
+          <span class="tag tag-gold">⚡ Open Source · Self-Hosted</span>
+        </div>
+        <h1 class="hero-title fade-up-2">
+          AI paralegal for<br/>
+          <span>EB-5 investor</span><br/>
+          visa filings
+        </h1>
+        <p class="hero-desc fade-up-3">
+          ParaLex reads your client's documents — bank statements, tax returns, wire transfers, passports — checks that the money is legal and traceable, flags what's missing, and drafts the Source of Funds memo for you.<br/><br/>
+          Every answer cites the exact document and page. <strong style="color:rgba(255,255,255,.85)">No hallucination.</strong>
+        </p>
+        <div class="hero-cta fade-up-3">
+          <a href="#install" class="btn-primary">🚀 Get Started Free</a>
+          <a href="#how-it-works" class="btn-outline">See how it works →</a>
+        </div>
+      </div>
+
+      <!-- Mini app mockup -->
+      <div class="hero-mockup fade-up-3">
+        <div class="mockup-bar">
+          <div class="mockup-dot" style="background:#ff5f57"></div>
+          <div class="mockup-dot" style="background:#febc2e"></div>
+          <div class="mockup-dot" style="background:#28c840"></div>
+          <span class="mockup-title">ParaLex — Chen Wei · EB5-2024-041</span>
+        </div>
+        <div class="mockup-tabs">
+          <div class="mockup-tab">Documents</div>
+          <div class="mockup-tab active">Q&amp;A Chat</div>
+          <div class="mockup-tab">Gap Analysis</div>
+          <div class="mockup-tab">Memos</div>
+        </div>
+        <div class="mockup-body">
+          <div class="chat-bubble chat-user">
+            What is the total balance across all bank accounts shown in the statements?
+          </div>
+          <div class="chat-bubble chat-ai">
+            <div class="chat-ai-header">
+              <div class="chat-avatar">⚖️</div>
+              <span style="font-size:12px;font-weight:600;color:#374151">ParaLex</span>
+              <span style="font-size:11px;color:#9ca3af;margin-left:auto">3 sources cited</span>
+            </div>
+            Based on the uploaded statements, the combined balance as of December 2023 is <strong>$1,247,850 USD</strong>:<br/><br/>
+            <span class="cite-pill">📄 ICBC_Statement_Dec2023.pdf, p.1</span> — ¥6,200,000 (≈ $874,000)<br/>
+            <span class="cite-pill">📄 Chase_Statement_Dec2023.pdf, p.3</span> — $248,500<br/>
+            <span class="cite-pill">📄 Schwab_Brokerage.pdf, p.2</span> — $125,350
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px;background:rgba(59,130,246,.05);border-radius:8px;border:1px solid rgba(59,130,246,.1)">
+            <div style="flex:1;font-size:12px;color:#9ca3af">Ask anything about this case...</div>
+            <div style="width:28px;height:28px;background:#1d4ed8;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px">➤</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Problem vs Solution ── -->
+<section class="section">
+  <div class="container">
+    <div class="problem-grid">
+      <div>
+        <div class="section-header">
+          <div style="margin-bottom:12px"><span class="tag" style="background:rgba(239,68,68,.1);color:#dc2626;border-color:rgba(239,68,68,.2)">😓 The problem today</span></div>
+          <h2 class="section-title">EB-5 paralegal work is slow and error-prone</h2>
+          <p class="section-sub">Each petition means reviewing hundreds of pages manually, and one missed discrepancy can sink a filing.</p>
+        </div>
+        <ul class="problem-list">
+          <li>
+            <span class="problem-icon">📂</span>
+            <div class="problem-text">
+              <h4>Hundreds of pages per client</h4>
+              <p>Bank statements, tax returns, wire transfers, passports — often in multiple languages.</p>
+            </div>
+          </li>
+          <li>
+            <span class="problem-icon">🔍</span>
+            <div class="problem-text">
+              <h4>Manual fund tracing</h4>
+              <p>Tracing $800K+ from source to USCIS escrow means cross-referencing dozens of documents by hand.</p>
+            </div>
+          </li>
+          <li>
+            <span class="problem-icon">📝</span>
+            <div class="problem-text">
+              <h4>Memo drafting from scratch</h4>
+              <p>Source of Funds memos take hours to write — even with templates — because every fact must be cited.</p>
+            </div>
+          </li>
+          <li>
+            <span class="problem-icon">❌</span>
+            <div class="problem-text">
+              <h4>Easy to miss a document</h4>
+              <p>Forgetting one exhibit or one year of tax returns can trigger an RFE from USCIS, delaying the petition by months.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <div style="margin-bottom:12px"><span class="tag tag-green">✅ What ParaLex does</span></div>
+          <h2 class="section-title">Automates the review. Keeps you in control.</h2>
+          <p class="section-sub">ParaLex does the reading, checking, and first-draft writing. You review and file.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="solution-card">
+            <div class="solution-icon-wrap" style="background:rgba(34,197,94,.12)">📖</div>
+            <div>
+              <h4>Reads all your documents</h4>
+              <p>Parses PDFs, scanned images (with OCR), Excel, Word — bank statements, tax returns, W-2s, passports, wire transfers.</p>
+            </div>
+          </div>
+          <div class="solution-card">
+            <div class="solution-icon-wrap" style="background:rgba(59,130,246,.12)">🔗</div>
+            <div>
+              <h4>Verifies source &amp; path of funds</h4>
+              <p>Checks that income sources are documented and traces the money from origin to the USCIS escrow investment.</p>
+            </div>
+          </div>
+          <div class="solution-card">
+            <div class="solution-icon-wrap" style="background:rgba(245,158,11,.12)">📋</div>
+            <div>
+              <h4>Shows exactly what's missing</h4>
+              <p>Runs a gap analysis against the USCIS EB-5 checklist and tells you which documents still need to be obtained.</p>
+            </div>
+          </div>
+          <div class="solution-card">
+            <div class="solution-icon-wrap" style="background:rgba(168,85,247,.12)">✍️</div>
+            <div>
+              <h4>Drafts the SOF memo for you</h4>
+              <p>Auto-writes a Source of Funds memorandum with every fact cited to a specific document and page number.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ── -->
+<section class="section section-dark" id="how-it-works">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <span class="tag tag-gold" style="margin-bottom:14px;display:inline-flex">How it works</span>
+      <h2 class="section-title light">From documents to filed memo in 4 steps</h2>
+      <p class="section-sub light" style="margin:0 auto">An attorney can go from raw client documents to a USCIS-ready Source of Funds memo in under an hour.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num" style="background:rgba(245,166,35,.15);border-color:rgba(245,166,35,.4)">📁</div>
+        <h3>1. Create a Case</h3>
+        <p>Enter client name, investment amount, and whether it's a TEA project. Takes 30 seconds.</p>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4)">☁️</div>
+        <h3>2. Upload Documents</h3>
+        <p>Drag and drop everything — bank statements, tax returns, passports, wire transfers. ParaLex auto-classifies and indexes each one.</p>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4)">🔍</div>
+        <h3>3. Review the Analysis</h3>
+        <p>See the gap analysis (what's missing), ask questions about the funds, and verify the source of funds story.</p>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4)">📄</div>
+        <h3>4. Draft &amp; Export Memo</h3>
+        <p>Click "Draft SOF Memo" — ParaLex writes the full memorandum with inline citations. Export to Markdown or Word.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature deep dives ── -->
+<section class="section section-alt" id="features">
+  <div class="container">
+    <div class="section-header">
+      <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Features</span>
+      <h2 class="section-title">Everything an EB-5 paralegal does, automated</h2>
+      <p class="section-sub">Built around the USCIS EB-5 requirements and the documents attorneys actually receive.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Auto-Document Classification</h3>
+        <p>Every uploaded file is automatically classified into the correct EB-5 category — no manual tagging needed.</p>
+        <div class="feature-tags">
+          <span class="f-tag">Bank Statement</span><span class="f-tag">W-2</span><span class="f-tag">Passport</span><span class="f-tag">Wire Transfer</span><span class="f-tag">401(k)</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>Grounded Q&amp;A Chat</h3>
+        <p>Ask any question about the case — "What's the total bank balance?" or "When was the wire sent?" — and get an answer with the exact source cited.</p>
+        <div class="feature-tags">
+          <span class="f-tag">Streaming answers</span><span class="f-tag">Page-level citations</span><span class="f-tag">No hallucination</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>USCIS Gap Analysis</h3>
+        <p>Runs your document set against the full USCIS EB-5 checklist. Shows ✅ present, ❌ missing, and ⚠️ uncertain with specific notes per item.</p>
+        <div class="feature-tags">
+          <span class="f-tag">Completeness %</span><span class="f-tag">Priority actions</span><span class="f-tag">Red flags</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>SOF Memo Drafting</h3>
+        <p>Generates a complete Source of Funds memorandum from your documents. Every sentence is backed by a citation like <em>[Chase Bank Statement, p.7]</em>.</p>
+        <div class="feature-tags">
+          <span class="f-tag">Inline citations</span><span class="f-tag">USCIS format</span><span class="f-tag">Export .md / .docx</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔎</div>
+        <h3>OCR for Scanned Docs</h3>
+        <p>Passports, bank stamps, hand-signed documents — anything scanned is run through Tesseract OCR and indexed just like digital PDFs.</p>
+        <div class="feature-tags">
+          <span class="f-tag">300 DPI rendering</span><span class="f-tag">Auto-preprocessing</span><span class="f-tag">Confidence scoring</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>100% Local &amp; Private</h3>
+        <p>Client documents never leave your machine. Embeddings are computed locally. The only external call is to the AI model API for analysis.</p>
+        <div class="feature-tags">
+          <span class="f-tag">On-premise</span><span class="f-tag">Docker</span><span class="f-tag">Local embeddings</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Screenshots ── -->
+<section class="section" id="screenshots">
+  <div class="container">
+    <div class="section-header" style="text-align:center;max-width:600px;margin:0 auto 52px">
+      <span class="tag tag-gold" style="margin-bottom:14px;display:inline-flex">UI Preview</span>
+      <h2 class="section-title">A purpose-built interface for EB-5 work</h2>
+    </div>
+    <div class="screenshots">
+
+      <!-- Screenshot 1: Document Manager -->
+      <div class="screenshot-row">
+        <div class="screenshot-text">
+          <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Step 1</span>
+          <h3>Upload &amp; auto-index every document</h3>
+          <p>Drag and drop a whole case folder. ParaLex reads each file, runs OCR on scanned pages, and classifies it automatically — <em>bank statement, W-2, passport, 401(k)</em> and more.</p>
+          <p>A green ✓ means it's been parsed, chunked, and indexed into the search engine. You can ask questions the moment indexing completes.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="tag" style="background:rgba(34,197,94,.1);color:#16a34a;border-color:rgba(34,197,94,.2)">✅ PDF (digital)</span>
+            <span class="tag" style="background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.2)">🔎 Scanned OCR</span>
+            <span class="tag" style="background:rgba(245,158,11,.1);color:#b45309;border-color:rgba(245,158,11,.2)">📊 Excel / CSV</span>
+          </div>
+        </div>
+        <div class="screenshot-ui">
+          <div class="ui-header">
+            <span class="ui-header-title">📁 Documents — Chen Wei</span>
+            <span style="font-size:11px;color:var(--gray-400)">9 documents · 7 indexed</span>
+          </div>
+          <div class="ui-body">
+            <div class="doc-row">
+              <div class="doc-status-dot dot-green"></div>
+              <div class="doc-name">Passport_Chen_Wei.pdf</div>
+              <div class="doc-cat">Passport</div>
+              <div class="doc-pages">4 pp · OCR</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-status-dot dot-green"></div>
+              <div class="doc-name">ICBC_Bank_Statements_2022_2023.pdf</div>
+              <div class="doc-cat">Bank Statement</div>
+              <div class="doc-pages">48 pp</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-status-dot dot-green"></div>
+              <div class="doc-name">China_Tax_Returns_2019_2023.pdf</div>
+              <div class="doc-cat">Tax Return</div>
+              <div class="doc-pages">32 pp · OCR</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-status-dot dot-green"></div>
+              <div class="doc-name">Wire_Transfer_Escrow_Mar2024.pdf</div>
+              <div class="doc-cat">Wire Transfer</div>
+              <div class="doc-pages">2 pp</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-status-dot dot-green"></div>
+              <div class="doc-name">Stock_Portfolio_Schwab_2023.xlsx</div>
+              <div class="doc-cat">Stock Statement</div>
+              <div class="doc-pages">3 sheets</div>
+            </div>
+            <div class="doc-row">
+              <div class="doc-status-dot dot-spin" style="animation:blink 1.2s ease infinite"></div>
+              <div class="doc-name">Business_Sale_Agreement_2022.pdf</div>
+              <div class="doc-cat" style="background:rgba(59,130,246,.1);color:var(--blue)">Indexing…</div>
+              <div class="doc-pages">18 pp</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screenshot 2: Chat -->
+      <div class="screenshot-row reverse">
+        <div class="screenshot-text">
+          <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Step 2</span>
+          <h3>Ask anything — get cited answers only</h3>
+          <p>The Q&amp;A is grounded <em>entirely</em> in the uploaded documents. Every answer includes the exact source — file name and page number. If the information isn't in the documents, ParaLex says so instead of guessing.</p>
+          <p>This protects the attorney: every fact in the conversation can be traced back to the document that supports it.</p>
+        </div>
+        <div class="screenshot-ui">
+          <div class="ui-header">
+            <span class="ui-header-title">💬 Q&amp;A Chat — Chen Wei</span>
+          </div>
+          <div class="ui-body">
+            <div class="chat-bubble chat-user">Where did the investment funds come from?</div>
+            <div class="chat-bubble chat-ai">
+              <div class="chat-ai-header">
+                <div class="chat-avatar">⚖️</div>
+                <span style="font-size:12px;font-weight:600;color:#374151">ParaLex</span>
+              </div>
+              The $850,000 investment came from three documented sources:<br/><br/>
+              <strong>1. Business sale proceeds</strong> — Chen Wei sold a 35% stake in Shenzhen Tech Co. for ¥4.2M (~$590K) in August 2022 <span class="cite-pill">Business_Sale_Agreement_2022.pdf, p.3</span><br/><br/>
+              <strong>2. Brokerage liquidation</strong> — $180K from Schwab stock sales in Q4 2023 <span class="cite-pill">Schwab_Portfolio_2023.xlsx, Sheet 2</span><br/><br/>
+              <strong>3. Accumulated savings</strong> — $80K from ICBC savings account as of Jan 2024 <span class="cite-pill">ICBC_Bank_Statements.pdf, p.12</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screenshot 3: Gap Analysis -->
+      <div class="screenshot-row">
+        <div class="screenshot-text">
+          <span class="tag tag-gold" style="margin-bottom:14px;display:inline-flex">Step 3</span>
+          <h3>See exactly what USCIS will need</h3>
+          <p>The gap analysis compares the uploaded documents against the full USCIS EB-5 requirements checklist. It tells you what's covered, what's missing, and what needs clarification — before you file.</p>
+          <p>Priority actions and red flags are highlighted so attorneys know exactly what to request from the client next.</p>
+        </div>
+        <div class="screenshot-ui">
+          <div class="ui-header">
+            <span class="ui-header-title">📋 Gap Analysis — Chen Wei</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:999px;background:rgba(34,197,94,.1);color:#16a34a;font-weight:600">78% complete</span>
+          </div>
+          <div class="ui-body">
+            <div class="completeness-bar"><div class="completeness-fill" style="width:78%"></div></div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:8px">SOURCE OF FUNDS</div>
+            <div class="gap-item">
+              <div class="gap-check">✅</div>
+              <div class="gap-label">5 Years Personal Tax Returns</div>
+              <div class="gap-file">China_Tax_Returns.pdf</div>
+            </div>
+            <div class="gap-item">
+              <div class="gap-check">✅</div>
+              <div class="gap-label">12 Months Bank Statements</div>
+              <div class="gap-file">ICBC_Statements.pdf</div>
+            </div>
+            <div class="gap-item">
+              <div class="gap-check">✅</div>
+              <div class="gap-label">Business Sale Documentation</div>
+              <div class="gap-file">Sale_Agreement_2022.pdf</div>
+            </div>
+            <div class="gap-item" style="background:rgba(239,68,68,.03)">
+              <div class="gap-check">❌</div>
+              <div class="gap-label" style="color:#dc2626;font-weight:500">Business Tax Returns (3 years)</div>
+              <div class="gap-file" style="color:#dc2626">MISSING</div>
+            </div>
+            <div class="gap-item" style="background:rgba(245,158,11,.03)">
+              <div class="gap-check">⚠️</div>
+              <div class="gap-label" style="color:#b45309">Bank statements only 8 months (need 12)</div>
+              <div class="gap-file" style="color:#b45309">INCOMPLETE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screenshot 4: Memo -->
+      <div class="screenshot-row reverse">
+        <div class="screenshot-text">
+          <span class="tag tag-green" style="margin-bottom:14px;display:inline-flex">Step 4</span>
+          <h3>Get a fully-cited SOF memo in one click</h3>
+          <p>ParaLex writes the complete Source of Funds memorandum — introduction, biographical background, source analysis, path of funds, conclusion, and exhibit list — formatted for USCIS submission.</p>
+          <p>Every single factual claim is cited to the document and page that supports it. Attorneys review, edit, and file. Export as Markdown or Word.</p>
+        </div>
+        <div class="screenshot-ui">
+          <div class="ui-header">
+            <span class="ui-header-title">📝 Source of Funds Memo — Chen Wei</span>
+            <span style="font-size:11px;color:var(--gray-400)">Draft · 12 citations</span>
+          </div>
+          <div class="ui-body">
+            <div class="memo-section">
+              <div class="memo-h2">MEMORANDUM</div>
+              <div class="memo-p">To: USCIS · From: [Attorney Name] · Re: Source of Funds — I-526E Petition of Chen Wei</div>
+            </div>
+            <div class="memo-section">
+              <div class="memo-h2">I. INTRODUCTION</div>
+              <div class="memo-p">The Petitioner, Chen Wei, is a national of the People's Republic of China seeking classification as an EB-5 immigrant investor. The Petitioner intends to invest $850,000 in a USCIS-designated Targeted Employment Area project...</div>
+            </div>
+            <div class="memo-section">
+              <div class="memo-h2">II. SOURCE OF FUNDS</div>
+              <div class="memo-p"><strong>A. Business Sale Proceeds.</strong> In August 2022, the Petitioner sold a 35% ownership stake in Shenzhen Technology Co., Ltd. for ¥4,200,000 RMB.</div>
+              <div class="memo-cite">Business Sale and Purchase Agreement dated August 14, 2022 [Business_Sale_Agreement_2022.pdf, p.3]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Privacy ── -->
+<section class="privacy-strip">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:40px">
+      <h2 style="font-size:28px;font-weight:800;color:var(--white)">Client data stays on your machine</h2>
+      <p style="color:rgba(255,255,255,.5);font-size:15px;margin-top:8px">Built for attorneys who handle sensitive financial documents</p>
+    </div>
+    <div class="privacy-grid">
+      <div class="privacy-item">
+        <div class="privacy-icon">🏠</div>
+        <div>
+          <h4>Self-hosted by design</h4>
+          <p>Runs on your laptop or firm server. No SaaS subscription. No documents sent to any cloud storage.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-icon">🧠</div>
+        <div>
+          <h4>Local embeddings</h4>
+          <p>Document text is converted to search vectors by a model that runs locally on your machine — no API call for that step.</p>
+        </div>
+      </div>
+      <div class="privacy-item">
+        <div class="privacy-icon">🔑</div>
+        <div>
+          <h4>Your API key, your data</h4>
+          <p>ParaLex calls the AI model API using your own key. Document excerpts are sent for analysis only — not stored by the API provider beyond the call.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Install ── -->
+<section class="section section-alt" id="install">
+  <div class="container">
+    <div class="section-header">
+      <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Get started</span>
+      <h2 class="section-title">Up and running in under 10 minutes</h2>
+      <p class="section-sub">No cloud account needed. Just Python, Node.js, and an API key.</p>
+    </div>
+
+    <div class="install-grid">
+      <div>
+        <div class="install-steps">
+          <div class="install-step">
+            <div class="step-num-sm">1</div>
+            <div>
+              <h4>Clone the repo</h4>
+              <div class="code-block">git clone https://github.com/YOUR_GITHUB/paralex<br/>cd paralex</div>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-num-sm">2</div>
+            <div>
+              <h4>Add your Anthropic API key</h4>
+              <p>Get a key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a></p>
+              <div class="code-block">cp backend/.env.example backend/.env<br/><span class="dim"># Edit backend/.env:</span><br/><span class="gold">ANTHROPIC_API_KEY</span>=<span class="green">sk-ant-your-key-here</span></div>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-num-sm">3</div>
+            <div>
+              <h4>Install Tesseract OCR (for scanned docs)</h4>
+              <div class="code-block"><span class="dim"># macOS</span><br/>brew install tesseract<br/><br/><span class="dim"># Ubuntu / Debian</span><br/>sudo apt install tesseract-ocr</div>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-num-sm">4</div>
+            <div>
+              <h4>Start the app</h4>
+              <div class="code-block">./start-dev.sh</div>
+              <p style="font-size:13px;color:var(--gray-500);margin-top:8px">Or with Docker: <code style="background:var(--gray-200);padding:2px 6px;border-radius:4px;font-size:12px">docker compose up --build</code></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="req-card">
+          <h3>Requirements</h3>
+          <div class="req-item">
+            <span>🐍</span> Python 3.11+ <span class="req-badge req-req">Required</span>
+          </div>
+          <div class="req-item">
+            <span>⬢</span> Node.js 20+ <span class="req-badge req-req">Required</span>
+          </div>
+          <div class="req-item">
+            <span>🔑</span> Anthropic API key <span class="req-badge req-req">Required</span>
+          </div>
+          <div class="req-item">
+            <span>🔎</span> Tesseract OCR <span class="req-badge req-opt">For OCR</span>
+          </div>
+          <div class="req-item">
+            <span>🐳</span> Docker <span class="req-badge req-opt">For Docker deploy</span>
+          </div>
+        </div>
+
+        <div class="req-card" style="background:var(--navy);border-color:rgba(255,255,255,.1)">
+          <h3 style="color:var(--white)">Or use Docker (one command)</h3>
+          <div class="code-block" style="background:rgba(255,255,255,.05);color:#a5f3fc">
+            <span class="dim"># Copy and set your API key</span><br/>
+            cp .env.example .env<br/><br/>
+            <span class="dim"># Build and start</span><br/>
+            docker compose up --build -d<br/><br/>
+            <span class="green"># → http://localhost:3000 ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Tech Stack ── -->
+<section class="section section-dark">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title light">Built on proven open-source tools</h2>
+      <p class="section-sub light" style="margin:0 auto">No proprietary lock-in. Swap any component to fit your infrastructure.</p>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-item"><div class="si">⚡</div><h4>FastAPI</h4><p>Python async backend</p></div>
+      <div class="stack-item"><div class="si">⚛️</div><h4>Next.js 15</h4><p>React frontend</p></div>
+      <div class="stack-item"><div class="si">🧠</div><h4>Claude Sonnet</h4><p>Anthropic LLM</p></div>
+      <div class="stack-item"><div class="si">🔍</div><h4>ChromaDB</h4><p>Local vector store</p></div>
+      <div class="stack-item"><div class="si">📐</div><h4>BGE Embeddings</h4><p>Local — no API</p></div>
+      <div class="stack-item"><div class="si">📄</div><h4>Tesseract OCR</h4><p>Open source OCR</p></div>
+      <div class="stack-item"><div class="si">🗄️</div><h4>SQLite</h4><p>Zero-config database</p></div>
+      <div class="stack-item"><div class="si">🐳</div><h4>Docker</h4><p>One-command deploy</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-links">
+      <a href="https://github.com/YOUR_GITHUB/paralex" target="_blank">GitHub</a>
+      <a href="https://github.com/YOUR_GITHUB/paralex/issues" target="_blank">Issues</a>
+      <a href="https://github.com/YOUR_GITHUB/paralex/blob/main/README.md" target="_blank">Docs</a>
+      <a href="https://github.com/YOUR_GITHUB/paralex/blob/main/LICENSE" target="_blank">License</a>
+    </div>
+    <p>
+      ParaLex is open source software. Not legal advice. Not affiliated with USCIS or any government agency.<br/>
+      Built to help EB-5 attorneys work faster — the attorney always reviews and files.
+    </p>
+  </div>
+</footer>
+
+<script>
+  // Smooth anchor scroll with offset for sticky nav
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        window.scrollTo({ top: target.offsetTop - 64, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+</body>
+</html>

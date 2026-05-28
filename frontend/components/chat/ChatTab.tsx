@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Send, MessageSquare, Loader2, AlertCircle,
-  BookOpen, ChevronDown, ChevronRight, FileText
+  BookOpen, ChevronDown, ChevronRight, FileText, Sparkles
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -25,21 +25,23 @@ interface Message {
 }
 
 const SUGGESTED_QUESTIONS = [
-  "What is the total amount in the bank accounts?",
-  "Summarize the source of funds for this case.",
-  "What wire transfers were made and when?",
-  "What income is documented in the tax returns?",
-  "Are there any discrepancies between the bank statements?",
-  "What are the 401(k) or retirement account details?",
+  { q: "What is the total balance across all bank accounts?", tag: "Bank" },
+  { q: "Summarize the client's employment history and salary income.", tag: "Income" },
+  { q: "What wire transfers were made and are they documented?", tag: "Wires" },
+  { q: "What income is reported on the tax returns across all years provided?", tag: "Taxes" },
+  { q: "What are the 401(k) or retirement account balances and any rollover details?", tag: "401k" },
+  { q: "Is there documentation of how the investment funds were accumulated?", tag: "SOF" },
+  { q: "What stock or brokerage accounts are in the client's name?", tag: "Stocks" },
+  { q: "Are there any large unexplained deposits or transfers?", tag: "Red Flags" },
 ];
 
 export function ChatTab({ caseId, caseName }: Props) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string | undefined>();
+  const [messages,   setMessages]   = useState<Message[]>([]);
+  const [input,      setInput]      = useState("");
+  const [loading,    setLoading]    = useState(false);
+  const [sessionId,  setSessionId]  = useState<string | undefined>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef       = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,14 +54,9 @@ export function ChatTab({ caseId, caseName }: Props) {
     setInput("");
     setLoading(true);
 
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: q,
-    };
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: q };
     setMessages(prev => [...prev, userMsg]);
 
-    // Add streaming assistant placeholder
     const assistantId = (Date.now() + 1).toString();
     setMessages(prev => [
       ...prev,
@@ -67,19 +64,17 @@ export function ChatTab({ caseId, caseName }: Props) {
     ]);
 
     try {
-      // Use streaming endpoint
       const res = await fetch(`/api/v1/cases/${caseId}/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q, session_id: sessionId }),
       });
 
-      const reader = res.body!.getReader();
+      const reader  = res.body!.getReader();
       const decoder = new TextDecoder();
       let fullText = "";
       let citations: Citation[] = [];
       let hasRelevantContent = false;
-      let newSessionId = sessionId;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -99,41 +94,25 @@ export function ChatTab({ caseId, caseName }: Props) {
             } else if (parsed.type === "text") {
               fullText += parsed.text;
               setMessages(prev =>
-                prev.map(m =>
-                  m.id === assistantId
-                    ? { ...m, content: fullText }
-                    : m
-                )
+                prev.map(m => m.id === assistantId ? { ...m, content: fullText } : m)
               );
             }
           } catch {}
         }
       }
 
-      // Finalize
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantId
-            ? {
-                ...m,
-                content: fullText,
-                citations,
-                has_relevant_content: hasRelevantContent,
-                streaming: false,
-              }
+            ? { ...m, content: fullText, citations, has_relevant_content: hasRelevantContent, streaming: false }
             : m
         )
       );
-
     } catch (err: any) {
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantId
-            ? {
-                ...m,
-                content: `Error: ${err.message}. Please try again.`,
-                streaming: false,
-              }
+            ? { ...m, content: `Error: ${err.message}. Please try again.`, streaming: false }
             : m
         )
       );
@@ -150,52 +129,28 @@ export function ChatTab({ caseId, caseName }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-200px)] min-h-[500px]">
-      {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+    <div className="flex flex-col h-[calc(100vh-220px)] min-h-[500px]">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto space-y-4 pr-1 pb-2">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-12">
-            <div className="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mb-4">
-              <MessageSquare className="w-7 h-7 text-brand-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Ask anything about {caseName}'s documents
-            </h3>
-            <p className="text-sm text-gray-500 max-w-md mb-8">
-              Every answer is grounded in the uploaded documents only.
-              No hallucination — if it's not in the docs, I'll say so.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-xl">
-              {SUGGESTED_QUESTIONS.map(q => (
-                <button
-                  key={q}
-                  onClick={() => sendMessage(q)}
-                  className="text-left p-3 text-sm text-brand-700 bg-brand-50 hover:bg-brand-100
-                             border border-brand-200 rounded-xl transition-colors"
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          </div>
+          <WelcomeScreen caseName={caseName} onQuestion={sendMessage} />
         ) : (
-          messages.map(msg => (
-            <ChatBubble key={msg.id} message={msg} />
-          ))
+          messages.map(msg => <ChatBubble key={msg.id} message={msg} />)
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="mt-4 card p-3">
+      {/* Input bar */}
+      <div className="mt-3 card p-3 shadow-sm">
         <div className="flex gap-3 items-end">
           <textarea
             ref={inputRef}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask a question about the case documents... (Enter to send, Shift+Enter for newline)"
-            className="flex-1 resize-none text-sm text-gray-800 placeholder-gray-400 outline-none bg-transparent min-h-[44px] max-h-32"
+            placeholder="Ask anything about the documents… (Enter to send)"
+            className="flex-1 resize-none text-sm text-slate-800 placeholder-slate-400
+                       outline-none bg-transparent min-h-[44px] max-h-32"
             rows={1}
             disabled={loading}
           />
@@ -204,18 +159,55 @@ export function ChatTab({ caseId, caseName }: Props) {
             disabled={loading || !input.trim()}
             className="flex-shrink-0 w-10 h-10 bg-brand-600 text-white rounded-xl
                        flex items-center justify-center hover:bg-brand-700
-                       disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                       disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
+            {loading
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <Send className="w-4 h-4" />
+            }
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-2 px-1">
-          🔒 Answers are grounded in uploaded documents only. All data stays local.
+        <p className="text-xs text-slate-400 mt-2 px-1 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 bg-success-500 rounded-full" />
+          Every answer is grounded in uploaded documents only — no hallucination.
         </p>
+      </div>
+    </div>
+  );
+}
+
+function WelcomeScreen({ caseName, onQuestion }: { caseName: string; onQuestion: (q: string) => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full text-center py-8">
+      <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+        <Sparkles className="w-8 h-8 text-brand-600" />
+      </div>
+      <h3 className="text-xl font-bold text-slate-800 mb-2">
+        Document Q&A — {caseName}
+      </h3>
+      <p className="text-sm text-slate-500 max-w-md mb-2">
+        Ask any question about the case documents.
+        Every answer is cited to the exact document and page number.
+      </p>
+      <p className="text-xs text-slate-400 mb-8 max-w-sm">
+        No hallucination — if the answer isn't in the documents, I'll tell you exactly what's missing.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-2xl">
+        {SUGGESTED_QUESTIONS.map(({ q, tag }) => (
+          <button
+            key={q}
+            onClick={() => onQuestion(q)}
+            className="text-left p-3.5 bg-white hover:bg-brand-50 border border-slate-200
+                       hover:border-brand-300 rounded-xl transition-all group text-sm"
+          >
+            <span className="inline-block text-xs font-bold text-brand-600 bg-brand-50
+                             border border-brand-100 px-2 py-0.5 rounded-full mb-1.5 group-hover:bg-brand-100">
+              {tag}
+            </span>
+            <p className="text-slate-700 group-hover:text-brand-800 leading-snug">{q}</p>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -227,7 +219,7 @@ function ChatBubble({ message }: { message: Message }) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-2xl bg-brand-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm">
+        <div className="max-w-2xl bg-brand-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm shadow-sm">
           {message.content}
         </div>
       </div>
@@ -236,26 +228,26 @@ function ChatBubble({ message }: { message: Message }) {
 
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 bg-brand-50 rounded-xl flex items-center justify-center shrink-0 mt-1">
-        <MessageSquare className="w-4 h-4 text-brand-600" />
+      <div className="w-8 h-8 bg-brand-100 rounded-xl flex items-center justify-center shrink-0 mt-1">
+        <Sparkles className="w-4 h-4 text-brand-700" />
       </div>
       <div className="flex-1 max-w-3xl space-y-2">
-        {/* Answer */}
-        <div className="card px-5 py-4">
+        {/* Answer card */}
+        <div className="card px-5 py-4 shadow-sm">
           {message.has_relevant_content === false && !message.streaming && (
-            <div className="flex items-center gap-2 text-amber-600 text-sm mb-3 p-2 bg-amber-50 rounded-lg">
-              <AlertCircle className="w-4 h-4" />
-              No relevant documents found for this query.
+            <div className="flex items-center gap-2 text-amber-700 text-sm mb-3 p-2.5 bg-amber-50
+                            border border-amber-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              No relevant content found for this query in the uploaded documents.
             </div>
           )}
-
           <div className={`prose-legal text-sm ${message.streaming && !message.content ? "cursor-blink" : ""}`}>
             {message.content ? (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {message.content + (message.streaming ? "▋" : "")}
               </ReactMarkdown>
             ) : message.streaming ? (
-              <span className="text-gray-400">Searching documents...</span>
+              <span className="text-slate-400 text-xs">Searching documents...</span>
             ) : null}
           </div>
         </div>
@@ -265,26 +257,26 @@ function ChatBubble({ message }: { message: Message }) {
           <div>
             <button
               onClick={() => setShowCitations(v => !v)}
-              className="flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-medium"
+              className="flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-semibold"
             >
               <BookOpen className="w-3.5 h-3.5" />
               {message.citations.length} source{message.citations.length !== 1 ? "s" : ""} cited
-              {showCitations ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              {showCitations
+                ? <ChevronDown className="w-3 h-3" />
+                : <ChevronRight className="w-3 h-3" />}
             </button>
 
             {showCitations && (
               <div className="mt-2 space-y-2">
                 {message.citations.map((c, i) => (
                   <div key={i} className="citation-card">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileText className="w-3.5 h-3.5 text-blue-600" />
-                      <span className="font-medium text-blue-800 text-xs">{c.filename}</span>
-                      <span className="text-blue-500 text-xs">p.{c.page_number}</span>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <FileText className="w-3.5 h-3.5 text-brand-600" />
+                      <span className="font-semibold text-brand-800 text-xs">{c.filename}</span>
+                      <span className="text-slate-400 text-xs">page {c.page_number}</span>
                       <span className="badge badge-category ml-auto">{categoryLabel(c.category)}</span>
                     </div>
-                    <p className="text-xs text-gray-600 leading-relaxed italic">
-                      "{c.excerpt}"
-                    </p>
+                    <p className="text-xs text-slate-600 leading-relaxed italic">"{c.excerpt}"</p>
                   </div>
                 ))}
               </div>
@@ -292,9 +284,8 @@ function ChatBubble({ message }: { message: Message }) {
           </div>
         )}
 
-        {/* Chunk count */}
         {message.retrieved_chunks !== undefined && message.retrieved_chunks > 0 && !message.streaming && (
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-slate-400">
             Retrieved {message.retrieved_chunks} relevant passage{message.retrieved_chunks !== 1 ? "s" : ""} from documents
           </p>
         )}

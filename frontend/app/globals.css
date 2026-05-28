@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,82 +7,140 @@
 @layer base {
   html {
     @apply antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
   }
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-slate-50 text-slate-900;
   }
 }
 
 @layer components {
+  /* Cards */
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+  }
+  .card-hover {
+    @apply card hover:shadow-md hover:border-brand-200 transition-all cursor-pointer;
   }
 
+  /* Form elements */
   .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900
-           placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30
-           focus:border-blue-500 transition-colors bg-white;
+    @apply w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900
+           placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20
+           focus:border-brand-500 transition-colors bg-white;
   }
-
   .label {
-    @apply block text-xs font-medium text-gray-600 mb-1;
+    @apply block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide;
+  }
+  .select {
+    @apply input appearance-none bg-white;
   }
 
+  /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-blue-700 text-white
-           rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white
+           rounded-lg text-sm font-semibold hover:bg-brand-700 transition-colors
+           disabled:opacity-40 disabled:cursor-not-allowed shadow-sm;
   }
-
   .btn-secondary {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700
-           border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50
-           transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-white text-slate-700
+           border border-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50
+           transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-gold {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-gold-500 text-white
+           rounded-lg text-sm font-semibold hover:bg-gold-600 transition-colors
+           disabled:opacity-40 disabled:cursor-not-allowed shadow-sm;
   }
 
+  /* Badges */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
+  .badge-present  { @apply badge bg-success-50 text-success-600 border border-success-200; }
+  .badge-missing  { @apply badge bg-danger-50 text-danger-600 border border-red-200; }
+  .badge-uncertain { @apply badge bg-amber-50 text-amber-700 border border-amber-200; }
+  .badge-category { @apply badge bg-brand-50 text-brand-600 border border-brand-100; }
+  .badge-status-active      { @apply badge bg-success-50 text-success-600; }
+  .badge-status-under_review { @apply badge bg-blue-50 text-blue-600; }
+  .badge-status-submitted   { @apply badge bg-purple-50 text-purple-600; }
 
-  .badge-present {
-    @apply badge bg-green-50 text-green-600;
-  }
-
-  .badge-missing {
-    @apply badge bg-red-50 text-red-600;
-  }
-
-  .badge-uncertain {
-    @apply badge bg-amber-50 text-amber-700;
-  }
-
-  .badge-category {
-    @apply badge bg-blue-50 text-blue-700;
-  }
-
+  /* Citation cards */
   .citation-card {
-    @apply p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm;
+    @apply p-3 bg-brand-50 border border-brand-100 rounded-lg text-sm;
   }
 
-  /* Markdown prose */
+  /* Exhibit badge */
+  .exhibit-tag {
+    @apply inline-flex items-center px-2 py-0.5 bg-gold-100 text-gold-700
+           rounded text-xs font-bold border border-gold-200;
+  }
+
+  /* Markdown prose for memos */
   .prose-legal {
-    @apply prose prose-sm max-w-none;
+    @apply prose prose-slate prose-sm max-w-none;
+  }
+  .prose-legal h1 { @apply text-xl font-bold text-brand-900 mt-6 mb-3; }
+  .prose-legal h2 { @apply text-base font-bold text-brand-800 mt-5 mb-2 border-b border-slate-200 pb-1; }
+  .prose-legal h3 { @apply text-sm font-bold text-slate-700 mt-4 mb-1; }
+  .prose-legal p  { @apply text-slate-700 leading-relaxed mb-3; }
+  .prose-legal table { @apply w-full text-xs border-collapse; }
+  .prose-legal th { @apply bg-brand-50 text-brand-700 font-semibold px-3 py-2 text-left border border-slate-200; }
+  .prose-legal td { @apply px-3 py-2 border border-slate-200 text-slate-700; }
+
+  /* Section divider */
+  .section-header {
+    @apply flex items-center gap-3 mb-4;
+  }
+  .section-header h2 {
+    @apply text-lg font-bold text-slate-900;
+  }
+  .section-line {
+    @apply flex-1 h-px bg-slate-200;
   }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #64748b; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* Streaming cursor blink */
+/* Streaming cursor */
 @keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 .cursor-blink::after {
   content: '▋';
-  animation: blink 1s step-end infinite;
-  color: #1d4ed8;
+  animation: blink 0.9s step-end infinite;
+  color: #1e3a5f;
+  font-size: 0.85em;
+}
+
+/* Exhibit numbered list in memos */
+.exhibit-list {
+  counter-reset: exhibit;
+  list-style: none;
+  padding: 0;
+}
+.exhibit-list li {
+  counter-increment: exhibit;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.exhibit-list li::before {
+  content: "Exhibit " counter(exhibit, upper-alpha);
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #b07d1e;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
 }

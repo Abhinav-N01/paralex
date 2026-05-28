@@ -40,7 +40,7 @@ EB5_CHECKLIST = {
         "label": "Source of Funds (SOF) Documents",
         "required": [
             {"id": "tax_returns_5yr", "label": "5 Years of Personal Tax Returns (or foreign equivalent)", "category": DocumentCategory.TAX_RETURN},
-            {"id": "bank_stmts_12mo", "label": "12 Months of Bank Statements (all accounts)", "category": DocumentCategory.BANK_STATEMENT},
+            {"id": "bank_stmts_7yr", "label": "7 Years of Bank Statements — All Accounts (US + Foreign)", "category": DocumentCategory.BANK_STATEMENT},
             {"id": "investment_stmts", "label": "Investment / Brokerage Account Statements", "category": DocumentCategory.INVESTMENT_STATEMENT},
         ],
         "conditional": [
@@ -54,17 +54,24 @@ EB5_CHECKLIST = {
         ],
     },
     "path_of_funds": {
-        "label": "Path of Funds (POF) — Tracing Investment",
+        "label": "Path of Funds (POF) — Tracing Investment to Escrow",
         "required": [
-            {"id": "wire_transfers", "label": "Wire Transfer Records to RC Escrow / Project", "category": DocumentCategory.WIRE_TRANSFER},
-            {"id": "escrow_confirmation", "label": "Escrow / Subscription Agreement Confirmation"},
+            {"id": "wire_transfers", "label": "Wire Transfer Record(s) to RC Escrow — All Tranches / Installments", "category": DocumentCategory.WIRE_TRANSFER},
+            {"id": "escrow_confirmation", "label": "Escrow Agreement / Subscription Agreement Confirmation"},
+            {"id": "wire_total", "label": "Wire Total Equals Investment Minimum ($800K TEA or $1.05M Standard)"},
+        ],
+        "conditional": [
+            {"id": "tranche_2", "label": "Capital Call / Tranche 2 Wire Transfer", "condition": "if investment made in installments"},
+            {"id": "tranche_3", "label": "Additional Tranche Wire Transfers", "condition": "if investment made in 3+ tranches"},
+            {"id": "intl_transfer", "label": "International Wire / Currency Conversion Records", "condition": "if funds originated outside the US"},
+            {"id": "account_bridge", "label": "Intermediate Account Statements (showing fund movement between accounts)", "condition": "if funds moved through multiple accounts before wire"},
         ],
     },
     "business_docs": {
         "label": "Business / Ownership Documents (if self-employed or business owner)",
         "conditional": [
             {"id": "biz_registration", "label": "Business Registration / Articles of Incorporation", "category": DocumentCategory.BUSINESS_OWNERSHIP},
-            {"id": "biz_financials", "label": "Business Financial Statements (3 years)", "category": DocumentCategory.BUSINESS_FINANCIALS},
+            {"id": "biz_financials", "label": "Business Financial Statements (5 years)", "category": DocumentCategory.BUSINESS_FINANCIALS},
             {"id": "ownership_proof", "label": "Proof of Ownership Percentage"},
         ],
     },
@@ -82,12 +89,16 @@ Your task:
 - Map each uploaded document to the checklist items it covers
 - Identify which required items are PRESENT, MISSING, or UNCERTAIN
 - Identify which conditional items are PRESENT, MISSING, or NOT APPLICABLE
-- Flag any documents that appear incomplete (e.g., only 3 months of bank statements instead of 12)
+- Flag any documents that appear incomplete (e.g., only 1-2 years of bank statements instead of 7 years)
 - Note any documents that need clarification (e.g., non-English documents without translations)
 
 Rules:
 - Base your analysis ONLY on the documents provided — do not assume documents exist if not listed
-- Be specific: if 12 months of bank statements are needed but only 6 months are present, say so
+- Be specific: if 7 years of bank statements are needed but only 2 years are present, say so
+- EB-5 standard requires 7 years of bank statements for ALL accounts (US and foreign/Indian accounts)
+- For Path of Funds: verify all wire transfers total up to the investment minimum. If investor wired in tranches (e.g. $100K then $700K), check that ALL wires are documented and sum to the required amount
+- Flag if wire transfers are present but do not add up to the investment amount stated in the case
+- If an international transfer is present, check for currency conversion documentation
 - If you cannot determine coverage from the metadata alone, mark as UNCERTAIN and explain why
 
 Output a structured JSON response following the exact schema provided."""

@@ -289,8 +289,8 @@ export function categoryLabel(cat: string): string {
 }
 
 export const DOCUMENT_STATUS_COLORS: Record<string, string> = {
-  pending: "bg-gray-100 text-gray-600",
+  pending:    "bg-slate-100 text-slate-500",
   processing: "bg-blue-50 text-blue-600",
-  indexed: "bg-success-50 text-success-600",
-  failed: "bg-danger-50 text-danger-600",
+  indexed:    "bg-success-50 text-success-600",
+  failed:     "bg-danger-50 text-danger-600",
 };

@@ -1,459 +1,545 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ParaLex — AI Paralegal for EB-5 Investor Visa Filings</title>
-  <meta name="description" content="ParaLex automates the paralegal work behind EB-5 investor visa petitions — verifying legal source of funds, tracing fund paths, flagging document gaps, and drafting USCIS memos. All answers grounded in the client's own documents." />
-  <meta property="og:title" content="ParaLex — AI Paralegal for EB-5 Filings" />
-  <meta property="og:description" content="Upload client documents. Get a grounded gap analysis and a fully-cited Source of Funds memo in minutes." />
-  <meta property="og:type" content="website" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ParaLex — AI Paralegal for EB-5 Investor Visa Filings</title>
+<meta name="description" content="ParaLex automates the paralegal work behind EB-5 investor visa petitions — verifying source of funds, tracing fund paths, flagging document gaps, and drafting USCIS memos."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a1628; --navy2:#0f2035; --navy3:#162d4a; --navy4:#1e3a5f;
+  --gold:#c8972a; --gold2:#f5a623; --gold3:#fef3c7;
+  --blue:#2563eb; --blue2:#dbeafe;
+  --green:#16a34a; --green2:#dcfce7;
+  --red:#dc2626; --red2:#fee2e2;
+  --amber:#d97706; --amber2:#fef3c7;
+  --s50:#f8fafc; --s100:#f1f5f9; --s200:#e2e8f0; --s300:#cbd5e1;
+  --s400:#94a3b8; --s500:#64748b; --s600:#475569; --s700:#334155;
+  --s800:#1e293b; --s900:#0f172a; --white:#fff;
+  --r:12px; --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(--s700);-webkit-font-smoothing:antialiased;line-height:1.6}
+a{text-decoration:none;color:inherit}
 
-    :root {
-      --navy:    #0a1628;
-      --navy-2:  #0f2044;
-      --navy-3:  #1a3260;
-      --gold:    #f5a623;
-      --gold-2:  #fbbf24;
-      --blue:    #3b82f6;
-      --blue-2:  #60a5fa;
-      --green:   #22c55e;
-      --red:     #ef4444;
-      --amber:   #f59e0b;
-      --white:   #ffffff;
-      --gray-50: #f8fafc;
-      --gray-100:#f1f5f9;
-      --gray-200:#e2e8f0;
-      --gray-400:#94a3b8;
-      --gray-500:#64748b;
-      --gray-600:#475569;
-      --gray-700:#334155;
-      --gray-900:#0f172a;
-      --radius:  12px;
-      --shadow:  0 4px 24px rgba(0,0,0,.10);
-      --shadow-lg: 0 20px 60px rgba(0,0,0,.18);
-    }
+/* ── NAV ─────────────────────────────────────────── */
+nav{position:sticky;top:0;z-index:100;background:rgba(10,22,40,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-name{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-.02em}
+.logo-tag{font-size:10px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:2px 8px;border-radius:99px;margin-left:6px}
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-link{color:rgba(255,255,255,.55);font-size:13px;font-weight:500;padding:7px 12px;border-radius:8px;transition:.2s}
+.nav-link:hover{color:var(--white);background:rgba(255,255,255,.07)}
+.btn-gold{background:var(--gold);color:var(--white);font-size:13px;font-weight:700;padding:8px 18px;border-radius:9px;margin-left:8px;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-gold:hover{background:var(--gold2)}
+.btn-ghost{color:rgba(255,255,255,.65);font-size:14px;font-weight:600;padding:12px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.15);transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-ghost:hover{background:rgba(255,255,255,.07);color:var(--white)}
 
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--gray-700); line-height: 1.6; }
+/* ── LAYOUT ──────────────────────────────────────── */
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.section{padding:88px 0}
+.section-alt{background:var(--s50)}
+.section-dark{background:var(--navy);color:var(--white)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.section-title{font-size:38px;font-weight:900;color:var(--s900);letter-spacing:-.025em;line-height:1.1;margin-bottom:16px}
+.section-sub{font-size:16px;color:var(--s500);max-width:560px;line-height:1.7;margin-bottom:0}
+.section-dark .section-title{color:var(--white)}
+.section-dark .section-sub{color:rgba(255,255,255,.5)}
 
-    /* ── Utilities ─────────────────────────────────────── */
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
-    .tag-gold  { background: rgba(245,166,35,.15); color: var(--gold); border: 1px solid rgba(245,166,35,.3); }
-    .tag-blue  { background: rgba(59,130,246,.12); color: var(--blue); border: 1px solid rgba(59,130,246,.25); }
-    .tag-green { background: rgba(34,197,94,.12);  color: var(--green); border: 1px solid rgba(34,197,94,.25); }
-    .badge-present { background: rgba(34,197,94,.12);  color: #16a34a; }
-    .badge-missing { background: rgba(239,68,68,.10);  color: #dc2626; }
-    .badge-warn    { background: rgba(245,158,11,.12); color: #b45309; }
+/* ── HERO ────────────────────────────────────────── */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,#0d1f3c 100%);padding:80px 0 0;overflow:hidden;position:relative}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 900px 700px at 65% 40%,rgba(200,151,42,.07) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(200,151,42,.12);border:1px solid rgba(200,151,42,.25);color:var(--gold2);font-size:12px;font-weight:600;padding:6px 14px;border-radius:99px;margin-bottom:22px}
+.hero-badge span{width:6px;height:6px;background:var(--gold2);border-radius:50%}
+.hero h1{font-size:52px;font-weight:900;color:var(--white);line-height:1.05;letter-spacing:-.03em;margin-bottom:18px}
+.hero h1 em{font-style:normal;color:var(--gold2)}
+.hero p{font-size:16px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:32px;max-width:480px}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.hero-tags{display:flex;flex-wrap:wrap;gap:6px}
+.hero-tag{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:3px 10px;border-radius:99px}
 
-    /* ── Nav ───────────────────────────────────────────── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(10,22,40,.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,.07);
-    }
-    .nav-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 24px; max-width: 1100px; margin: 0 auto;
-    }
-    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .logo-icon {
-      width: 36px; height: 36px; background: var(--gold);
-      border-radius: 9px; display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-    }
-    .logo-text { font-size: 20px; font-weight: 800; color: var(--white); }
-    .logo-sub  { font-size: 11px; color: rgba(255,255,255,.45); font-weight: 400; display: block; line-height: 1; }
-    .nav-links { display: flex; align-items: center; gap: 8px; }
-    .nav-link { color: rgba(255,255,255,.65); text-decoration: none; font-size: 14px; padding: 6px 14px; border-radius: 8px; transition: all .2s; }
-    .nav-link:hover { color: var(--white); background: rgba(255,255,255,.08); }
-    .btn-nav {
-      background: var(--gold); color: var(--navy); font-weight: 700; font-size: 13px;
-      padding: 8px 18px; border-radius: 9px; text-decoration: none;
-      transition: all .2s; display: flex; align-items: center; gap: 6px;
-    }
-    .btn-nav:hover { background: var(--gold-2); transform: translateY(-1px); }
+/* ── APP WINDOW ──────────────────────────────────── */
+.app-win{background:var(--s50);border-radius:14px;overflow:hidden;border:1px solid var(--s200);box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04)}
+.app-tb{background:var(--navy);padding:10px 14px;display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%}.dot-r{background:#ff5f57}.dot-y{background:#ffbd2e}.dot-g{background:#28c840}
+.app-url{flex:1;background:rgba(255,255,255,.07);border-radius:5px;padding:4px 10px;color:rgba(255,255,255,.35);font-size:10px;font-family:'JetBrains Mono',monospace;text-align:center}
+.app-tabs-bar{background:var(--navy3);padding:0 14px;display:flex;gap:1px;border-bottom:1px solid rgba(255,255,255,.08)}
+.atab{padding:9px 12px;font-size:11px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;display:flex;align-items:center;gap:5px;transition:.15s;border-radius:6px 6px 0 0;white-space:nowrap}
+.atab.active{background:var(--s50);color:var(--navy4);margin-top:3px}
+.atab:not(.active):hover{color:rgba(255,255,255,.7)}
+.app-body{background:var(--s50);min-height:340px}
+.tab-panel{display:none;padding:16px;animation:fadeIn .2s ease}
+.tab-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ── Hero ──────────────────────────────────────────── */
-    .hero {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 50%, #0d1b3e 100%);
-      padding: 90px 0 80px;
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse 800px 600px at 70% 50%, rgba(59,130,246,.07) 0%, transparent 70%);
-    }
-    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; position: relative; z-index: 1; }
-    .hero-eyebrow { margin-bottom: 18px; }
-    .hero-title { font-size: 46px; font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 20px; }
-    .hero-title span { color: var(--gold); }
-    .hero-desc { font-size: 17px; color: rgba(255,255,255,.65); margin-bottom: 36px; line-height: 1.7; }
-    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
-    .btn-primary {
-      background: var(--gold); color: var(--navy); font-weight: 700; font-size: 15px;
-      padding: 13px 28px; border-radius: 10px; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 8px;
-      transition: all .2s; box-shadow: 0 4px 20px rgba(245,166,35,.35);
-    }
-    .btn-primary:hover { background: var(--gold-2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,166,35,.45); }
-    .btn-outline {
-      border: 1.5px solid rgba(255,255,255,.25); color: var(--white); font-weight: 600; font-size: 15px;
-      padding: 13px 28px; border-radius: 10px; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 8px;
-      transition: all .2s;
-    }
-    .btn-outline:hover { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.06); }
+/* Shared mockup primitives */
+.ex{font-size:9px;font-weight:800;color:#92400e;background:#fef3c7;border:1px solid #fde68a;padding:2px 6px;border-radius:4px;flex-shrink:0;white-space:nowrap}
+.cat{font-size:9px;font-weight:600;background:#eef2ff;color:#3730a3;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.s-ok{font-size:9px;font-weight:700;background:#dcfce7;color:#15803d;padding:2px 7px;border-radius:99px;flex-shrink:0}
+.s-pr{font-size:9px;font-weight:700;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:99px;flex-shrink:0}
+.s-fa{font-size:9px;font-weight:700;background:#fee2e2;color:#dc2626;padding:2px 7px;border-radius:99px;flex-shrink:0}
+.doc-group{background:var(--white);border:1px solid var(--s200);border-radius:9px;overflow:hidden;margin-bottom:8px}
+.doc-gh{padding:7px 11px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--s100)}
+.doc-gh.bio{background:#eff6ff;color:#1d4ed8}
+.doc-gh.fin{background:#f0fdf4;color:#15803d}
+.doc-row{padding:7px 11px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--s100);font-size:11px;color:var(--s700)}
+.doc-row:last-child{border-bottom:none}
+.doc-name{flex:1;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-    /* hero UI mockup */
-    .hero-mockup {
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-    }
-    .mockup-bar {
-      background: rgba(255,255,255,.06);
-      padding: 10px 16px;
-      display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .mockup-title { color: rgba(255,255,255,.5); font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-left: 4px; }
-    .mockup-tabs { display: flex; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
-    .mockup-tab {
-      padding: 10px 14px; font-size: 12px; color: rgba(255,255,255,.4);
-      border-bottom: 2px solid transparent; cursor: default;
-    }
-    .mockup-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-    .mockup-body { padding: 16px; }
+/* Chat mockup */
+.chat-area{display:flex;flex-direction:column;gap:10px}
+.msg-user{background:#1e3a5f;color:var(--white);border-radius:14px 14px 4px 14px;padding:9px 12px;font-size:11px;line-height:1.5;align-self:flex-end;max-width:85%}
+.msg-ai{background:var(--white);border:1px solid var(--s200);border-radius:14px 14px 14px 4px;padding:10px 13px;font-size:11px;line-height:1.6;color:var(--s700);max-width:90%}
+.msg-ai strong{color:var(--s900);font-weight:700}
+.cite-chip{display:inline-flex;align-items:center;gap:3px;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px}
+.citations-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.citation-item{background:var(--s50);border:1px solid var(--s200);border-radius:6px;padding:5px 8px;font-size:10px;color:var(--s600);display:flex;align-items:center;gap:5px}
+.chat-input-bar{background:var(--white);border-top:1px solid var(--s200);padding:9px 12px;display:flex;align-items:center;gap:8px}
+.chat-input{flex:1;font-size:11px;color:var(--s400);font-family:'Inter',sans-serif}
+.chat-send{width:28px;height:28px;background:var(--navy4);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--white);font-size:14px;flex-shrink:0}
 
-    /* ── Problem/Solution ──────────────────────────────── */
-    .section { padding: 80px 0; }
-    .section-alt { background: var(--gray-50); }
-    .section-dark { background: var(--navy); }
-    .section-title { font-size: 34px; font-weight: 800; color: var(--gray-900); margin-bottom: 12px; line-height: 1.2; }
-    .section-title.light { color: var(--white); }
-    .section-sub { font-size: 17px; color: var(--gray-500); max-width: 580px; }
-    .section-sub.light { color: rgba(255,255,255,.6); }
-    .section-header { margin-bottom: 52px; }
+/* Gap analysis mockup */
+.gap-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.gap-score-card{padding:8px;border-radius:7px;text-align:center}
+.gap-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:3px}
+.gap-val{font-size:20px;font-weight:900}
+.gs-pct{background:#dbeafe;color:#1d4ed8}
+.gs-ok{background:#dcfce7;color:#15803d}
+.gs-no{background:#fee2e2;color:#dc2626}
+.gs-unk{background:#fef3c7;color:#b45309}
+.gap-bar{background:var(--white);border:1px solid var(--s200);border-radius:7px;padding:9px 11px;margin-bottom:8px}
+.gap-bar-track{background:var(--s200);border-radius:99px;height:5px;overflow:hidden;margin:5px 0 4px}
+.gap-bar-fill{background:linear-gradient(90deg,#22c55e,#16a34a);height:100%;border-radius:99px}
+.gap-section{background:var(--white);border:1px solid var(--s200);border-radius:7px;overflow:hidden;margin-bottom:8px}
+.gap-section-hd{padding:7px 11px;background:var(--s50);border-bottom:1px solid var(--s100);font-size:10px;font-weight:700;color:var(--s600);display:flex;justify-content:space-between}
+.gap-item{display:flex;align-items:center;gap:7px;padding:6px 11px;border-bottom:1px solid var(--s100);font-size:10px;color:var(--s700)}
+.gap-item:last-child{border-bottom:none}
+.gi-ok{width:14px;height:14px;border-radius:50%;background:#dcfce7;color:#16a34a;font-size:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gi-no{width:14px;height:14px;border-radius:50%;background:#fee2e2;color:#dc2626;font-size:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gi-un{width:14px;height:14px;border-radius:50%;background:#fef3c7;color:#d97706;font-size:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.miss-tag{font-size:9px;font-weight:700;color:var(--red);margin-left:auto}
+.warn-tag{font-size:9px;font-weight:700;color:var(--amber);margin-left:auto}
 
-    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
-    .problem-list { list-style: none; }
-    .problem-list li {
-      display: flex; gap: 14px; align-items: flex-start;
-      padding: 16px 0; border-bottom: 1px solid var(--gray-200);
-    }
-    .problem-list li:last-child { border: none; }
-    .problem-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
-    .problem-text h4 { font-size: 15px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
-    .problem-text p  { font-size: 14px; color: var(--gray-500); }
+/* Memo mockup */
+.memo-box{background:var(--white);border:1px solid var(--s200);border-radius:9px;overflow:hidden;font-size:10px;line-height:1.65;color:var(--s700)}
+.memo-hd{background:var(--navy);color:var(--white);padding:10px 14px}
+.memo-hd-title{font-size:11px;font-weight:800;letter-spacing:.04em;margin-bottom:5px}
+.memo-meta{display:grid;grid-template-columns:55px 1fr;gap:2px 8px;font-size:9px}
+.memo-meta .k{color:rgba(255,255,255,.5);font-weight:700}
+.memo-meta .v{color:rgba(255,255,255,.85)}
+.memo-body{padding:12px 14px}
+.memo-section{margin-bottom:11px}
+.memo-section h4{font-size:9px;font-weight:800;color:var(--navy4);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--s200);padding-bottom:4px;margin-bottom:6px}
+.memo-section p{font-size:10px;color:var(--s600);line-height:1.7}
+.mc{display:inline;background:#eef2ff;color:#3730a3;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid #c7d2fe}
+.me{display:inline;background:#fef3c7;color:#92400e;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid #fde68a}
+.memo-table{width:100%;border-collapse:collapse;font-size:9px;margin-top:6px}
+.memo-table th{background:var(--navy4);color:var(--white);padding:5px 7px;text-align:left;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.memo-table td{padding:5px 7px;border-bottom:1px solid var(--s100);color:var(--s700)}
+.memo-table tr:last-child td{border-bottom:none}
+.memo-exlist{border-top:1px solid var(--s200);padding:10px 14px;display:grid;gap:4px}
+.memo-exrow{display:flex;align-items:flex-start;gap:7px;font-size:9px;color:var(--s600)}
 
-    .solution-card {
-      background: var(--white); border: 1px solid var(--gray-200);
-      border-radius: var(--radius); padding: 24px; display: flex; gap: 16px;
-      box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s;
-    }
-    .solution-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.12); }
-    .solution-icon-wrap {
-      width: 44px; height: 44px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
-    }
-    .solution-card h4 { font-size: 15px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
-    .solution-card p  { font-size: 14px; color: var(--gray-500); line-height: 1.55; }
+/* ── STATS BAR ───────────────────────────────────── */
+.stats-bar{background:var(--navy3);border-top:1px solid rgba(255,255,255,.06);padding:28px 0}
+.stats-grid{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.stat{text-align:center}
+.stat-val{font-size:28px;font-weight:900;color:var(--white);letter-spacing:-.02em}
+.stat-lab{font-size:11px;color:rgba(255,255,255,.4);font-weight:500;margin-top:2px}
 
-    /* ── How it works ──────────────────────────────────── */
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
-    .steps::before {
-      content: ''; position: absolute; top: 32px; left: 10%; right: 10%; height: 2px;
-      background: linear-gradient(90deg, var(--gold) 0%, var(--blue) 100%);
-      z-index: 0;
-    }
-    .step { text-align: center; position: relative; z-index: 1; }
-    .step-num {
-      width: 64px; height: 64px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; margin: 0 auto 16px;
-      border: 3px solid var(--white);
-      box-shadow: 0 0 0 3px rgba(245,166,35,.25);
-    }
-    .step h3 { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
-    .step p  { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.55; }
+/* ── PATH OF FUNDS ───────────────────────────────── */
+.pof-timeline{position:relative;padding-left:32px}
+.pof-timeline::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--gold),var(--blue),var(--green))}
+.pof-item{position:relative;margin-bottom:24px}
+.pof-dot{position:absolute;left:-32px;top:4px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:3px solid var(--white);box-shadow:0 0 0 2px}
+.pof-dot.income{background:var(--navy4);box-shadow-color:var(--navy4)}
+.pof-dot.savings{background:#7c3aed;box-shadow-color:#7c3aed}
+.pof-dot.transfer{background:var(--amber);box-shadow-color:var(--amber)}
+.pof-dot.wire{background:var(--green);box-shadow-color:var(--green)}
+.pof-dot.escrow{background:var(--gold);box-shadow-color:var(--gold)}
+.pof-card{background:var(--white);border:1px solid var(--s200);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow)}
+.pof-card h4{font-size:13px;font-weight:700;color:var(--s900);margin-bottom:4px}
+.pof-card p{font-size:12px;color:var(--s500);line-height:1.5}
+.pof-amount{font-size:13px;font-weight:800;color:var(--green);margin-top:4px}
+.pof-doc{display:inline-flex;align-items:center;gap:4px;background:var(--s50);border:1px solid var(--s200);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--s600);margin-top:6px}
 
-    /* ── Features deep dive ────────────────────────────── */
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .feature-card {
-      background: var(--white); border: 1px solid var(--gray-200);
-      border-radius: var(--radius); padding: 28px;
-      transition: all .2s;
-    }
-    .feature-card:hover { border-color: rgba(59,130,246,.3); box-shadow: 0 6px 24px rgba(59,130,246,.08); transform: translateY(-2px); }
-    .feature-icon { font-size: 28px; margin-bottom: 14px; }
-    .feature-card h3 { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
-    .feature-card p  { font-size: 14px; color: var(--gray-500); line-height: 1.6; }
-    .feature-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-    .f-tag { font-size: 11px; background: var(--gray-100); color: var(--gray-600); padding: 3px 10px; border-radius: 999px; }
+/* ── INSTALLMENT ─────────────────────────────────── */
+.installment-track{background:var(--white);border:1px solid var(--s200);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.it-header{background:var(--navy);color:var(--white);padding:16px 20px}
+.it-header h3{font-size:14px;font-weight:700;margin-bottom:4px}
+.it-header p{font-size:12px;color:rgba(255,255,255,.5)}
+.it-body{padding:16px 20px}
+.it-progress-bar{background:var(--s100);border-radius:99px;height:10px;overflow:hidden;margin:12px 0 6px}
+.it-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.it-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--s100)}
+.it-row:last-child{border-bottom:none}
+.it-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+.it-num.paid{background:var(--green2);color:var(--green)}
+.it-num.pending{background:var(--s100);color:var(--s400)}
+.it-num.next{background:var(--amber2);color:var(--amber)}
+.it-info{flex:1}
+.it-info strong{display:block;font-size:13px;color:var(--s900)}
+.it-info span{font-size:11px;color:var(--s500)}
+.it-amt{font-size:13px;font-weight:800;color:var(--s900)}
+.it-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.it-s-paid{background:var(--green2);color:var(--green)}
+.it-s-next{background:var(--amber2);color:var(--amber)}
+.it-s-pend{background:var(--s100);color:var(--s400)}
 
-    /* ── UI Screenshots section ───────────────────────── */
-    .screenshots { display: flex; flex-direction: column; gap: 40px; }
-    .screenshot-row { display: grid; grid-template-columns: 1fr 1.3fr; gap: 48px; align-items: center; }
-    .screenshot-row.reverse { direction: rtl; }
-    .screenshot-row.reverse > * { direction: ltr; }
-    .screenshot-text h3 { font-size: 24px; font-weight: 700; color: var(--gray-900); margin-bottom: 12px; }
-    .screenshot-text p  { font-size: 15px; color: var(--gray-500); line-height: 1.7; margin-bottom: 16px; }
-    .screenshot-ui {
-      background: var(--white); border: 1px solid var(--gray-200);
-      border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg);
-    }
-    .ui-header {
-      background: var(--gray-50); padding: 12px 16px;
-      border-bottom: 1px solid var(--gray-200);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .ui-header-title { font-size: 13px; font-weight: 600; color: var(--gray-700); }
-    .ui-body { padding: 16px; }
+/* ── FEATURES ────────────────────────────────────── */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feat-card{padding:26px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);transition:.2s}
+.feat-card:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.07)}
+.feat-icon{font-size:24px;margin-bottom:14px}
+.feat-card h3{font-size:15px;font-weight:700;color:var(--white);margin-bottom:8px}
+.feat-card p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6}
 
-    /* document row */
-    .doc-row {
-      display: flex; align-items: center; gap: 12px; padding: 10px 0;
-      border-bottom: 1px solid var(--gray-100);
-    }
-    .doc-row:last-child { border: none; }
-    .doc-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .dot-green { background: var(--green); }
-    .dot-spin  { background: var(--blue); }
-    .dot-red   { background: var(--red); }
-    .doc-name { flex: 1; font-size: 13px; color: var(--gray-700); font-weight: 500; }
-    .doc-cat  { font-size: 11px; background: rgba(59,130,246,.1); color: var(--blue); padding: 2px 8px; border-radius: 999px; }
-    .doc-pages { font-size: 11px; color: var(--gray-400); }
+/* ── REQUIREMENTS TABLE ──────────────────────────── */
+.req-table{width:100%;border-collapse:collapse;font-size:13px}
+.req-table th{background:var(--navy);color:var(--white);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.req-table td{padding:10px 14px;border-bottom:1px solid var(--s100)}
+.req-table tr:last-child td{border-bottom:none}
+.req-table tr:hover td{background:var(--s50)}
+.req-yrs{font-weight:800;color:var(--navy4)}
+.req-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;display:inline-block}
+.rb{background:#dbeafe;color:#1d4ed8}
+.rg{background:#dcfce7;color:#15803d}
+.ra{background:#fef3c7;color:#b45309}
 
-    /* chat bubble */
-    .chat-bubble { border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; font-size: 13px; line-height: 1.6; }
-    .chat-user { background: #1d4ed8; color: var(--white); margin-left: 40px; }
-    .chat-ai   { background: var(--gray-50); border: 1px solid var(--gray-200); }
-    .chat-ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .chat-avatar { width: 24px; height: 24px; background: var(--navy); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-    .cite-pill {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: rgba(59,130,246,.1); color: var(--blue);
-      border: 1px solid rgba(59,130,246,.2);
-      border-radius: 6px; padding: 1px 7px; font-size: 11px; font-weight: 500;
-      margin: 0 2px;
-    }
+/* ── STEPS ───────────────────────────────────────── */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
+.steps::before{content:'';position:absolute;top:28px;left:calc(12.5% + 12px);right:calc(12.5% + 12px);height:2px;background:linear-gradient(90deg,var(--gold),var(--blue));opacity:.25}
+.step{text-align:center}
+.step-num{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;margin:0 auto 16px;background:var(--navy);color:var(--white);border:3px solid var(--gold)}
+.step h3{font-size:14px;font-weight:700;color:var(--s800);margin-bottom:8px}
+.step p{font-size:13px;color:var(--s500);line-height:1.5}
 
-    /* gap analysis */
-    .gap-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px;
-    }
-    .gap-item:last-child { border: none; }
-    .gap-check { font-size: 14px; width: 20px; text-align: center; }
-    .gap-label { flex: 1; color: var(--gray-700); }
-    .gap-file  { font-size: 11px; color: var(--gray-400); font-family: 'JetBrains Mono', monospace; }
-    .completeness-bar { background: var(--gray-100); border-radius: 999px; height: 8px; margin-bottom: 16px; overflow: hidden; }
-    .completeness-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--green) 0%, #16a34a 100%); }
+/* ── CODE ────────────────────────────────────────── */
+.code-block{background:var(--s900);color:#e2e8f0;font-family:'JetBrains Mono',monospace;font-size:13px;padding:20px 24px;border-radius:10px;line-height:1.7}
+.code-block .t{color:#60a5fa}.code-block .s{color:#86efac}
 
-    /* memo */
-    .memo-section { margin-bottom: 12px; }
-    .memo-h2 { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
-    .memo-p  { font-size: 12px; color: var(--gray-600); line-height: 1.6; }
-    .memo-cite {
-      font-size: 11px; color: var(--blue);
-      font-style: italic; border-left: 3px solid rgba(59,130,246,.3);
-      padding-left: 8px; margin-top: 4px;
-    }
+/* ── TECH GRID ───────────────────────────────────── */
+.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tech-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;text-align:center}
+.tech-item strong{display:block;color:var(--white);font-size:13px;font-weight:700;margin-bottom:2px}
+.tech-item span{color:rgba(255,255,255,.4);font-size:11px}
 
-    /* ── Privacy strip ─────────────────────────────────── */
-    .privacy-strip {
-      background: var(--navy-2); border-top: 1px solid rgba(255,255,255,.06);
-      padding: 60px 0;
-    }
-    .privacy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-    .privacy-item { display: flex; gap: 16px; align-items: flex-start; }
-    .privacy-icon { font-size: 28px; flex-shrink: 0; }
-    .privacy-item h4 { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
-    .privacy-item p  { font-size: 13px; color: rgba(255,255,255,.5); line-height: 1.55; }
+/* ── FOOTER ──────────────────────────────────────── */
+footer{background:var(--navy);padding:40px 0;border-top:1px solid rgba(255,255,255,.06)}
+.footer-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-links{display:flex;gap:20px}
+.footer-link{color:rgba(255,255,255,.4);font-size:13px;transition:.2s}
+.footer-link:hover{color:var(--white)}
 
-    /* ── Install ───────────────────────────────────────── */
-    .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-    .install-steps { counter-reset: step; }
-    .install-step {
-      display: flex; gap: 16px; padding: 20px 0;
-      border-bottom: 1px solid var(--gray-200);
-      counter-increment: step;
-    }
-    .install-step:last-child { border: none; }
-    .step-num-sm {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: var(--navy); color: var(--white);
-      font-size: 13px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .install-step h4 { font-size: 14px; font-weight: 600; color: var(--gray-900); margin-bottom: 6px; }
-    .install-step p  { font-size: 13px; color: var(--gray-500); margin-bottom: 8px; }
-    .code-block {
-      background: var(--gray-900); color: #a5f3fc;
-      border-radius: 8px; padding: 12px 16px;
-      font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8;
-      overflow-x: auto;
-    }
-    .code-block .dim { color: #64748b; }
-    .code-block .gold { color: var(--gold); }
-    .code-block .green { color: #86efac; }
-    .req-card {
-      background: var(--gray-50); border: 1px solid var(--gray-200);
-      border-radius: var(--radius); padding: 24px;
-    }
-    .req-card h3 { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 16px; }
-    .req-item {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 14px; color: var(--gray-700); padding: 8px 0;
-      border-bottom: 1px solid var(--gray-200);
-    }
-    .req-item:last-child { border: none; }
-    .req-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: auto; }
-    .req-req  { background: rgba(239,68,68,.1); color: var(--red); }
-    .req-opt  { background: var(--gray-200); color: var(--gray-600); }
-
-    /* ── Stack ─────────────────────────────────────────── */
-    .stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .stack-item {
-      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
-      border-radius: 10px; padding: 20px 16px; text-align: center;
-      transition: all .2s;
-    }
-    .stack-item:hover { background: rgba(255,255,255,.08); border-color: rgba(245,166,35,.25); }
-    .stack-item .si { font-size: 28px; margin-bottom: 8px; }
-    .stack-item h4 { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
-    .stack-item p  { font-size: 12px; color: rgba(255,255,255,.45); }
-
-    /* ── Footer ────────────────────────────────────────── */
-    footer {
-      background: var(--navy); border-top: 1px solid rgba(255,255,255,.06);
-      padding: 40px 0; text-align: center;
-    }
-    footer p { color: rgba(255,255,255,.35); font-size: 13px; }
-    footer a { color: var(--gold); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
-    .footer-links a { color: rgba(255,255,255,.5); font-size: 14px; text-decoration: none; }
-    .footer-links a:hover { color: var(--white); }
-
-    /* ── Responsive ────────────────────────────────────── */
-    @media (max-width: 768px) {
-      .hero-grid, .problem-grid, .install-grid,
-      .screenshot-row, .screenshot-row.reverse { grid-template-columns: 1fr; }
-      .steps { grid-template-columns: 1fr 1fr; }
-      .steps::before { display: none; }
-      .features-grid { grid-template-columns: 1fr 1fr; }
-      .privacy-grid, .stack-grid { grid-template-columns: 1fr 1fr; }
-      .hero-title { font-size: 32px; }
-      .nav-links { display: none; }
-    }
-    @media (max-width: 480px) {
-      .features-grid, .privacy-grid, .stack-grid, .steps { grid-template-columns: 1fr; }
-    }
-
-    /* ── Animations ────────────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp .6s ease forwards; }
-    .fade-up-2 { animation: fadeUp .6s ease .15s forwards; opacity: 0; }
-    .fade-up-3 { animation: fadeUp .6s ease .3s forwards;  opacity: 0; }
-
-    @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
-    .cursor::after { content: '▋'; animation: blink 1s step-end infinite; color: var(--blue); }
-  </style>
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media(max-width:960px){
+  .hero-inner,.two-col{grid-template-columns:1fr;gap:40px}
+  .hero h1{font-size:36px}
+  .hero-visual{display:none}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr 1fr;gap:32px}
+  .steps::before{display:none}
+  .tech-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-links{display:none}
+  .section-title{font-size:30px}
+}
+@media(max-width:600px){
+  .section{padding:60px 0}
+  .feat-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .tech-grid{grid-template-columns:1fr 1fr}
+  .section-title{font-size:26px}
+  .gap-scores{grid-template-columns:repeat(2,1fr)}
+}
+</style>
 </head>
 <body>
 
-<!-- ── Nav ── -->
+<!-- ── NAV ───────────────────────────────────────────────────── -->
 <nav>
   <div class="nav-inner">
     <a href="#" class="logo">
       <div class="logo-icon">⚖️</div>
-      <div>
-        <span class="logo-text">ParaLex</span>
-        <span class="logo-sub">EB-5 AI Paralegal</span>
-      </div>
+      <span class="logo-name">ParaLex</span>
+      <span class="logo-tag">EB-5 AI Paralegal</span>
     </a>
     <div class="nav-links">
-      <a href="#how-it-works" class="nav-link">How it works</a>
-      <a href="#features" class="nav-link">Features</a>
-      <a href="#screenshots" class="nav-link">Screenshots</a>
+      <a href="#demo" class="nav-link">Demo</a>
+      <a href="#path-of-funds" class="nav-link">Path of Funds</a>
+      <a href="#installments" class="nav-link">Installment Tracking</a>
+      <a href="#documents" class="nav-link">Documents</a>
       <a href="#install" class="nav-link">Install</a>
-      <a href="https://github.com/Abhinav-N01/paralex" class="btn-nav" target="_blank">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        View on GitHub
-      </a>
+      <a href="https://github.com/Abhinav-N01/paralex" target="_blank" class="btn-gold">GitHub →</a>
     </div>
   </div>
 </nav>
 
-<!-- ── Hero ── -->
+<!-- ── HERO ──────────────────────────────────────────────────── -->
 <section class="hero">
-  <div class="container">
-    <div class="hero-grid">
-      <div>
-        <div class="hero-eyebrow fade-up">
-          <span class="tag tag-gold">⚡ Open Source · Self-Hosted</span>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span></span>Purpose-built for EB-5 Immigration Attorneys</div>
+      <h1>The AI Paralegal<br/>for <em>EB-5</em> Filings</h1>
+      <p>Upload client documents. ParaLex verifies the source of funds, traces every dollar to escrow, tracks partial investments across multiple tranches, flags document gaps, and auto-drafts USCIS-ready SOF memos — all grounded in the actual documents. Zero hallucination.</p>
+      <div class="hero-actions">
+        <a href="#install" class="btn-gold" style="font-size:15px;padding:13px 28px">Get Started Free →</a>
+        <a href="#demo" class="btn-ghost">See the app ↓</a>
+      </div>
+      <div class="hero-tags">
+        <span class="hero-tag">Passport + I-94</span>
+        <span class="hero-tag">H-1B / I-797</span>
+        <span class="hero-tag">7 Yrs Bank Stmts</span>
+        <span class="hero-tag">W-2 / Tax Returns</span>
+        <span class="hero-tag">Wire Transfers</span>
+        <span class="hero-tag">401(k) / Stocks</span>
+        <span class="hero-tag">Indian ITR / PAN</span>
+        <span class="hero-tag">Installment Tracking</span>
+      </div>
+    </div>
+
+    <!-- App window -->
+    <div class="hero-visual" id="demo">
+      <div class="app-win">
+        <div class="app-tb">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="app-url">localhost:3000 — Rajesh Kumar Sharma · EB5-2025-001</div>
         </div>
-        <h1 class="hero-title fade-up-2">
-          AI paralegal for<br/>
-          <span>EB-5 investor</span><br/>
-          visa filings
-        </h1>
-        <p class="hero-desc fade-up-3">
-          ParaLex reads your client's documents — bank statements, tax returns, wire transfers, passports — checks that the money is legal and traceable, flags what's missing, and drafts the Source of Funds memo for you.<br/><br/>
-          Every answer cites the exact document and page. <strong style="color:rgba(255,255,255,.85)">No hallucination.</strong>
-        </p>
-        <div class="hero-cta fade-up-3">
-          <a href="#install" class="btn-primary">🚀 Get Started Free</a>
-          <a href="#how-it-works" class="btn-outline">See how it works →</a>
+        <div class="app-tabs-bar">
+          <div class="atab active" onclick="showTab('docs',this)">📄 Documents</div>
+          <div class="atab" onclick="showTab('chat',this)">💬 Q&amp;A Chat</div>
+          <div class="atab" onclick="showTab('gap',this)">📋 Gap Analysis</div>
+          <div class="atab" onclick="showTab('memo',this)">📝 SOF Memo</div>
+        </div>
+        <div class="app-body">
+
+          <!-- TAB: Documents -->
+          <div class="tab-panel active" id="tab-docs">
+            <div class="doc-group">
+              <div class="doc-gh bio">👤 Biographical Documents — 4 files</div>
+              <div class="doc-row"><span class="ex">Exhibit A</span><span class="doc-name">Rajesh_Sharma_Passport.pdf</span><span class="cat">Passport</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit B</span><span class="doc-name">I94_Entry_Record_2017.pdf</span><span class="cat">Visa Stamps</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit C</span><span class="doc-name">H1B_Visa_Stamps_2019-2025.pdf</span><span class="cat">Visa Stamps</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit D</span><span class="doc-name">I797_H1B_Approval_Oct2026.pdf</span><span class="cat">Visa Stamps</span><span class="s-ok">indexed</span></div>
+            </div>
+            <div class="doc-group">
+              <div class="doc-gh fin">💰 Financial Documents — 7 files</div>
+              <div class="doc-row"><span class="ex">Exhibit E</span><span class="doc-name">Chase_BankStmts_2018-2025.pdf</span><span class="cat">Bank Statement</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit F</span><span class="doc-name">HDFC_India_Stmts_2018-2025.pdf</span><span class="cat">Bank Statement</span><span class="s-pr">processing</span></div>
+              <div class="doc-row"><span class="ex">Exhibit G</span><span class="doc-name">W2_Forms_2020-2024.pdf</span><span class="cat">W-2</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit H</span><span class="doc-name">TaxReturns_2020-2024.pdf</span><span class="cat">Tax Return</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit I</span><span class="doc-name">Fidelity_401k_Statement.pdf</span><span class="cat">401(k)</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit J</span><span class="doc-name">Wire_Transfer_Tranche1_100k.pdf</span><span class="cat">Wire Transfer</span><span class="s-ok">indexed</span></div>
+              <div class="doc-row"><span class="ex">Exhibit K</span><span class="doc-name">Wire_Transfer_Tranche2_700k.pdf</span><span class="cat">Wire Transfer</span><span class="s-ok">indexed</span></div>
+            </div>
+          </div>
+
+          <!-- TAB: Chat -->
+          <div class="tab-panel" id="tab-chat">
+            <div class="chat-area">
+              <div class="msg-user">What is the total salary income documented for the last 5 years?</div>
+              <div>
+                <div class="msg-ai">
+                  <strong>Total documented W-2 income (2020–2024):</strong><br/>
+                  • 2020: $118,400 <span class="cite-chip">Exhibit G, p.1</span><br/>
+                  • 2021: $132,000 <span class="cite-chip">Exhibit G, p.2</span><br/>
+                  • 2022: $142,500 <span class="cite-chip">Exhibit G, p.3</span><br/>
+                  • 2023: $156,200 <span class="cite-chip">Exhibit G, p.4</span><br/>
+                  • 2024: $168,000 <span class="cite-chip">Exhibit G, p.5</span><br/>
+                  <strong>5-year total: $717,100</strong>
+                </div>
+                <div class="citations-row">
+                  <div class="citation-item">📄 W2_Forms_2020-2024.pdf · Exhibit G</div>
+                </div>
+              </div>
+              <div class="msg-user">Were the wire transfers to escrow in installments?</div>
+              <div>
+                <div class="msg-ai">
+                  Yes. The investment was made in <strong>two tranches</strong>:<br/>
+                  • <strong>Tranche 1 — $100,000</strong> wired Jan 15, 2025 to EB5 Capital Escrow, conf. #CHSW202501156421 <span class="cite-chip">Exhibit J, p.1</span><br/>
+                  • <strong>Tranche 2 — $700,000</strong> wired Mar 3, 2025, conf. #CHSW202503033817 <span class="cite-chip">Exhibit K, p.1</span><br/>
+                  Total invested: <strong>$800,000</strong> (TEA minimum met ✓)
+                </div>
+                <div class="citations-row">
+                  <div class="citation-item">📄 Wire_Transfer_Tranche1_100k.pdf · Exhibit J</div>
+                  <div class="citation-item">📄 Wire_Transfer_Tranche2_700k.pdf · Exhibit K</div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <span class="chat-input">Ask anything about the documents…</span>
+              <div class="chat-send">↑</div>
+            </div>
+          </div>
+
+          <!-- TAB: Gap Analysis -->
+          <div class="tab-panel" id="tab-gap">
+            <div class="gap-scores">
+              <div class="gap-score-card gs-pct"><div class="gap-label">Complete</div><div class="gap-val">72%</div></div>
+              <div class="gap-score-card gs-ok"><div class="gap-label">Present</div><div class="gap-val">13</div></div>
+              <div class="gap-score-card gs-no"><div class="gap-label">Missing</div><div class="gap-val">4</div></div>
+              <div class="gap-score-card gs-unk"><div class="gap-label">Uncertain</div><div class="gap-val">1</div></div>
+            </div>
+            <div class="gap-bar">
+              <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--s700)"><span>Documentation Completeness</span><span style="color:var(--blue)">72%</span></div>
+              <div class="gap-bar-track"><div class="gap-bar-fill" style="width:72%"></div></div>
+              <div style="font-size:9px;color:var(--s400)">13 of 18 required items · Based on 11 indexed documents</div>
+            </div>
+            <div class="gap-section">
+              <div class="gap-section-hd"><span>Biographical</span><span style="color:var(--green);font-size:9px">4/4 present</span></div>
+              <div class="gap-item"><div class="gi-ok">✓</div>Valid Passport (Rajesh Sharma)</div>
+              <div class="gap-item"><div class="gi-ok">✓</div>I-94 Entry Record</div>
+              <div class="gap-item"><div class="gi-ok">✓</div>H-1B Visa Stamps</div>
+              <div class="gap-item"><div class="gi-ok">✓</div>I-797 Approval Notice (valid to Oct 2026)</div>
+            </div>
+            <div class="gap-section">
+              <div class="gap-section-hd"><span>Source of Funds</span><span style="color:var(--amber);font-size:9px">5/8 present</span></div>
+              <div class="gap-item"><div class="gi-ok">✓</div>W-2 Forms (2020–2024)</div>
+              <div class="gap-item"><div class="gi-ok">✓</div>Tax Returns (2020–2024)</div>
+              <div class="gap-item"><div class="gi-un">?</div>US Bank Statements<div class="warn-tag">7 yrs needed — only 2018-2024 uploaded, verify Jan 2018</div></div>
+              <div class="gap-item"><div class="gi-no">✗</div>Indian Bank Stmts (HDFC) — still processing<div class="miss-tag">PROCESSING</div></div>
+              <div class="gap-item"><div class="gi-no">✗</div>Pay Stubs (last 3 months)<div class="miss-tag">MISSING</div></div>
+            </div>
+            <div class="gap-section">
+              <div class="gap-section-hd"><span>Path of Funds</span><span style="color:var(--green);font-size:9px">3/3 present</span></div>
+              <div class="gap-item"><div class="gi-ok">✓</div>Wire Transfer — Tranche 1 ($100,000)</div>
+              <div class="gap-item"><div class="gi-ok">✓</div>Wire Transfer — Tranche 2 ($700,000)</div>
+              <div class="gap-item"><div class="gi-ok">✓</div>Total $800,000 meets TEA minimum</div>
+            </div>
+          </div>
+
+          <!-- TAB: Memo -->
+          <div class="tab-panel" id="tab-memo">
+            <div class="memo-box">
+              <div class="memo-hd">
+                <div class="memo-hd-title">MEMORANDUM — SOURCE OF FUNDS</div>
+                <div class="memo-meta">
+                  <span class="k">TO:</span><span class="v">Immigration File</span>
+                  <span class="k">FROM:</span><span class="v">ParaLex AI Paralegal</span>
+                  <span class="k">RE:</span><span class="v">Rajesh Kumar Sharma — I-526E, EB5-2025-001</span>
+                </div>
+              </div>
+              <div class="memo-body">
+                <div class="memo-section">
+                  <h4>II. Biographical Background</h4>
+                  <p>The Petitioner, Rajesh Kumar Sharma, is a national of India born April 12, 1985 <span class="mc">Exhibit A: Passport, p.1</span>. He holds H-1B status authorized through October 1, 2026 per I-797 <span class="mc">Exhibit D: I-797, p.1</span>. I-94 shows continuous US presence since March 3, 2017 <span class="mc">Exhibit B: I-94, p.1</span>.</p>
+                </div>
+                <div class="memo-section">
+                  <h4>III-A. Employment Income — $717,100 (2020–2024)</h4>
+                  <p>Employed as Senior Software Engineer at Infosys BPM Ltd., San Jose, CA. W-2 wages: $118,400 (2020), $132,000 (2021), $142,500 (2022), $156,200 (2023), $168,000 (2024) <span class="mc">Exhibit G, pp.1–5</span>.</p>
+                </div>
+                <div class="memo-section">
+                  <h4>IV. Path of Funds — $800,000 in Two Tranches</h4>
+                  <table class="memo-table">
+                    <thead><tr><th>Date</th><th>Amount</th><th>From Account</th><th>To Escrow</th><th>Exhibit</th></tr></thead>
+                    <tbody>
+                      <tr><td>Jan 15, 2025</td><td>$100,000</td><td>Chase xxxxxx4821</td><td>EB5 Capital RC</td><td><span class="me">Exhibit J</span></td></tr>
+                      <tr><td>Mar 3, 2025</td><td>$700,000</td><td>Chase xxxxxx4821</td><td>EB5 Capital RC</td><td><span class="me">Exhibit K</span></td></tr>
+                      <tr><td colspan="2" style="font-weight:800;color:var(--green)">Total: $800,000</td><td colspan="3" style="color:var(--s500);font-size:8px">Meets TEA minimum of $800,000 ✓</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="memo-exlist">
+                  <div style="font-size:8.5px;font-weight:800;color:var(--navy4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">VII. Exhibit List</div>
+                  <div class="memo-exrow"><span class="me">Exhibit A</span><span>Rajesh_Sharma_Passport.pdf — Indian Passport, valid 2020–2030</span></div>
+                  <div class="memo-exrow"><span class="me">Exhibit B</span><span>I94_Entry_Record.pdf — I-94, entry Mar 3, 2017</span></div>
+                  <div class="memo-exrow"><span class="me">Exhibit D</span><span>I797_H1B_Approval.pdf — H-1B valid through Oct 1, 2026</span></div>
+                  <div class="memo-exrow"><span class="me">Exhibit J</span><span>Wire_Transfer_Tranche1_100k.pdf — $100,000 to escrow Jan 15, 2025</span></div>
+                  <div class="memo-exrow"><span class="me">Exhibit K</span><span>Wire_Transfer_Tranche2_700k.pdf — $700,000 to escrow Mar 3, 2025</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Mini app mockup -->
-      <div class="hero-mockup fade-up-3">
-        <div class="mockup-bar">
-          <div class="mockup-dot" style="background:#ff5f57"></div>
-          <div class="mockup-dot" style="background:#febc2e"></div>
-          <div class="mockup-dot" style="background:#28c840"></div>
-          <span class="mockup-title">ParaLex — Chen Wei · EB5-2024-041</span>
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-val">7 Yrs</div><div class="stat-lab">Bank Statements Required</div></div>
+      <div class="stat"><div class="stat-val">15+</div><div class="stat-lab">Document Types Supported</div></div>
+      <div class="stat"><div class="stat-val">Zero</div><div class="stat-lab">Hallucinations — Docs Only</div></div>
+      <div class="stat"><div class="stat-val">Multi</div><div class="stat-lab">Installment / Tranche Tracking</div></div>
+      <div class="stat"><div class="stat-val">100%</div><div class="stat-lab">Local — Private by Design</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PATH OF FUNDS ──────────────────────────────────────────── -->
+<section class="section" id="path-of-funds">
+  <div class="container">
+    <div class="two-col">
+      <div>
+        <p class="section-label">Path of Funds</p>
+        <h2 class="section-title">Trace every dollar from source to escrow</h2>
+        <p class="section-sub" style="margin-bottom:24px">USCIS requires that the full $800,000 investment be traced dollar-by-dollar — from where it was earned, through each bank account it passed through, all the way to the regional center escrow account. ParaLex does this automatically by reading all the uploaded bank statements, wire records, and account documents.</p>
+        <div style="background:var(--s50);border:1px solid var(--s200);border-radius:10px;padding:16px;margin-bottom:20px">
+          <p style="font-size:12px;font-weight:700;color:var(--s600);margin-bottom:8px">⚠️ What USCIS looks for in Path of Funds:</p>
+          <ul style="font-size:13px;color:var(--s500);padding-left:18px;line-height:2">
+            <li>Each account the funds passed through, with matching statements</li>
+            <li>No unexplained gaps — every large deposit must be explained</li>
+            <li>Wire transfer confirmations with exact amounts and dates</li>
+            <li>Foreign-to-US transfers must show currency conversion rates</li>
+            <li>401(k) or stock liquidations must show the rollover/distribution</li>
+          </ul>
         </div>
-        <div class="mockup-tabs">
-          <div class="mockup-tab">Documents</div>
-          <div class="mockup-tab active">Q&amp;A Chat</div>
-          <div class="mockup-tab">Gap Analysis</div>
-          <div class="mockup-tab">Memos</div>
-        </div>
-        <div class="mockup-body">
-          <div class="chat-bubble chat-user">
-            What is the total balance across all bank accounts shown in the statements?
-          </div>
-          <div class="chat-bubble chat-ai">
-            <div class="chat-ai-header">
-              <div class="chat-avatar">⚖️</div>
-              <span style="font-size:12px;font-weight:600;color:#374151">ParaLex</span>
-              <span style="font-size:11px;color:#9ca3af;margin-left:auto">3 sources cited</span>
+        <p style="font-size:13px;color:var(--s500)">ParaLex queries the documents and instantly answers: <em>"How did the money get from paycheck to escrow?"</em> — with every step cited to a specific document and page.</p>
+      </div>
+      <div>
+        <div class="pof-timeline">
+          <div class="pof-item">
+            <div class="pof-dot income">💼</div>
+            <div class="pof-card">
+              <h4>Employment Income — Infosys BPM Ltd.</h4>
+              <p>Rajesh earned $717,100 in W-2 wages over 5 years as Senior Software Engineer in San Jose, CA.</p>
+              <div class="pof-amount">$717,100 total (2020–2024)</div>
+              <div class="pof-doc">📄 Exhibit G: W2_Forms_2020-2024.pdf, pp.1–5</div>
             </div>
-            Based on the uploaded statements, the combined balance as of December 2023 is <strong>$1,247,850 USD</strong>:<br/><br/>
-            <span class="cite-pill">📄 ICBC_Statement_Dec2023.pdf, p.1</span> — ¥6,200,000 (≈ $874,000)<br/>
-            <span class="cite-pill">📄 Chase_Statement_Dec2023.pdf, p.3</span> — $248,500<br/>
-            <span class="cite-pill">📄 Schwab_Brokerage.pdf, p.2</span> — $125,350
           </div>
-          <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px;background:rgba(59,130,246,.05);border-radius:8px;border:1px solid rgba(59,130,246,.1)">
-            <div style="flex:1;font-size:12px;color:#9ca3af">Ask anything about this case...</div>
-            <div style="width:28px;height:28px;background:#1d4ed8;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px">➤</div>
+          <div class="pof-item">
+            <div class="pof-dot savings">🏦</div>
+            <div class="pof-card">
+              <h4>Accumulated in Chase Checking Account</h4>
+              <p>Net pay deposited monthly into Chase Bank account xxxxxx4821. Balance grew to $843,200 by December 2024.</p>
+              <div class="pof-amount">$843,200 balance verified</div>
+              <div class="pof-doc">📄 Exhibit E: Chase_BankStmts_2018-2025.pdf</div>
+            </div>
+          </div>
+          <div class="pof-item">
+            <div class="pof-dot transfer">💰</div>
+            <div class="pof-card">
+              <h4>401(k) Partial Rollover — Fidelity</h4>
+              <p>Additional $55,000 rolled over from Fidelity 401(k) to Chase account on December 20, 2024 to supplement investment funds.</p>
+              <div class="pof-amount">+$55,000 via rollover</div>
+              <div class="pof-doc">📄 Exhibit I: Fidelity_401k_Statement.pdf, p.3</div>
+            </div>
+          </div>
+          <div class="pof-item">
+            <div class="pof-dot wire">⚡</div>
+            <div class="pof-card" style="border-color:#fde68a;background:#fffbeb">
+              <h4>Tranche 1 — Initial Wire to Escrow</h4>
+              <p>$100,000 wired from Chase xxxxxx4821 to EB5 Capital Regional Center escrow account on January 15, 2025. Subscription agreement signed same day.</p>
+              <div class="pof-amount" style="color:var(--amber)">$100,000 · Jan 15, 2025</div>
+              <div class="pof-doc">📄 Exhibit J: Wire_Transfer_Tranche1_100k.pdf</div>
+            </div>
+          </div>
+          <div class="pof-item">
+            <div class="pof-dot escrow">✅</div>
+            <div class="pof-card" style="border-color:#bbf7d0;background:#f0fdf4">
+              <h4>Tranche 2 — Remaining Balance to Escrow</h4>
+              <p>Remaining $700,000 wired to escrow on March 3, 2025 after project capital call. Total investment of $800,000 meets TEA minimum.</p>
+              <div class="pof-amount">$700,000 · Mar 3, 2025 · Total: $800,000 ✓</div>
+              <div class="pof-doc">📄 Exhibit K: Wire_Transfer_Tranche2_700k.pdf</div>
+            </div>
           </div>
         </div>
       </div>
@@ -461,521 +547,280 @@
   </div>
 </section>
 
-<!-- ── Problem vs Solution ── -->
+<!-- ── INSTALLMENT TRACKING ───────────────────────────────────── -->
+<section class="section section-alt" id="installments">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:56px">
+      <p class="section-label">Installment / Tranche Tracking</p>
+      <h2 class="section-title">Investors don't always invest all at once</h2>
+      <p class="section-sub" style="margin:0 auto;text-align:center">Many EB-5 regional centers structure the investment in tranches — an initial deposit to reserve a spot, then one or more capital calls as the project needs funding. ParaLex tracks every tranche, verifies each wire, and ensures the memo accounts for all of them.</p>
+    </div>
+    <div class="two-col">
+      <div>
+        <h3 style="font-size:18px;font-weight:700;color:var(--s900);margin-bottom:16px">How tranche investments work</h3>
+        <div style="display:grid;gap:14px">
+          <div style="display:flex;gap:12px;padding:16px;background:var(--white);border-radius:10px;border:1px solid var(--s200)">
+            <span style="font-size:22px;flex-shrink:0">1️⃣</span>
+            <div>
+              <strong style="display:block;color:var(--s800);font-size:14px;margin-bottom:4px">Initial Reservation Deposit</strong>
+              <p style="font-size:13px;color:var(--s500)">Investor wires a smaller amount (e.g., $100,000) to hold their spot in the project. The subscription agreement is signed at this point.</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;padding:16px;background:var(--white);border-radius:10px;border:1px solid var(--s200)">
+            <span style="font-size:22px;flex-shrink:0">2️⃣</span>
+            <div>
+              <strong style="display:block;color:var(--s800);font-size:14px;margin-bottom:4px">Capital Call (Remaining Balance)</strong>
+              <p style="font-size:13px;color:var(--s500)">When the regional center is ready to deploy capital, they issue a "capital call." The investor wires the remaining amount (e.g., $700,000) to complete the $800,000 investment.</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;padding:16px;background:var(--white);border-radius:10px;border:1px solid var(--s200)">
+            <span style="font-size:22px;flex-shrink:0">3️⃣</span>
+            <div>
+              <strong style="display:block;color:var(--s800);font-size:14px;margin-bottom:4px">USCIS Filing After Full Investment</strong>
+              <p style="font-size:13px;color:var(--s500)">The I-526E petition is filed once the full amount is in escrow. The SOF memo must document every wire transfer and show how the total $800,000 was accumulated.</p>
+            </div>
+          </div>
+          <div style="padding:14px;background:#fef3c7;border:1px solid #fde68a;border-radius:10px">
+            <p style="font-size:13px;color:#92400e"><strong>What ParaLex does:</strong> Automatically reads all wire transfer documents, identifies each tranche, totals them up, verifies the sum meets the TEA minimum ($800,000) or standard minimum ($1,050,000), and writes it into the fund tracing table in the SOF memo with each wire on a separate row with its own exhibit reference.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="installment-track">
+          <div class="it-header">
+            <h3>Investment Tranche Tracker</h3>
+            <p>Rajesh Kumar Sharma · EB5-2025-001 · TEA Project</p>
+          </div>
+          <div class="it-body">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--s500);margin-bottom:6px">
+              <span>Total invested</span>
+              <span style="font-weight:800;color:var(--green)">$800,000 / $800,000 ✓</span>
+            </div>
+            <div class="it-progress-bar"><div class="it-fill" style="width:100%"></div></div>
+            <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:16px;text-align:right">TEA Minimum Met — Ready to File I-526E</div>
+
+            <div class="it-row">
+              <div class="it-num paid">✓</div>
+              <div class="it-info">
+                <strong>Tranche 1 — Reservation Deposit</strong>
+                <span>Jan 15, 2025 · Chase xxxxxx4821 → EB5 Capital Escrow · Conf. #CHSW202501156421</span>
+              </div>
+              <div style="text-align:right">
+                <div class="it-amt">$100,000</div>
+                <div class="it-status it-s-paid">Verified ✓</div>
+              </div>
+            </div>
+
+            <div class="it-row">
+              <div class="it-num paid">✓</div>
+              <div class="it-info">
+                <strong>Tranche 2 — Capital Call</strong>
+                <span>Mar 3, 2025 · Chase xxxxxx4821 → EB5 Capital Escrow · Conf. #CHSW202503033817</span>
+              </div>
+              <div style="text-align:right">
+                <div class="it-amt">$700,000</div>
+                <div class="it-status it-s-paid">Verified ✓</div>
+              </div>
+            </div>
+
+            <div style="background:var(--s50);border-radius:8px;padding:12px;margin-top:12px;border:1px solid var(--s200)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:12px;font-weight:700;color:var(--s700)">Documents verified for each tranche:</span>
+              </div>
+              <div style="display:grid;gap:4px;font-size:11px;color:var(--s600)">
+                <div>✅ Wire transfer confirmation — Tranche 1 (Exhibit J)</div>
+                <div>✅ Wire transfer confirmation — Tranche 2 (Exhibit K)</div>
+                <div>✅ Escrow account statement showing both receipts</div>
+                <div>✅ Chase bank statements show debit of both amounts</div>
+                <div>✅ Subscription agreement signed prior to Tranche 1</div>
+              </div>
+            </div>
+
+            <div style="background:#eff6ff;border-radius:8px;padding:12px;margin-top:10px;border:1px solid #bfdbfe">
+              <p style="font-size:12px;color:#1d4ed8;font-weight:600;margin-bottom:4px">💬 You can ask ParaLex:</p>
+              <p style="font-size:12px;color:#1e40af;font-style:italic">"Did the investor make all the required wire transfers to escrow and do the amounts add up to $800,000?"</p>
+              <p style="font-size:11px;color:#3b82f6;margin-top:4px">→ ParaLex reads all wire transfer documents and answers with citations to each one.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ────────────────────────────────────────────── -->
 <section class="section">
   <div class="container">
-    <div class="problem-grid">
-      <div>
-        <div class="section-header">
-          <div style="margin-bottom:12px"><span class="tag" style="background:rgba(239,68,68,.1);color:#dc2626;border-color:rgba(239,68,68,.2)">😓 The problem today</span></div>
-          <h2 class="section-title">EB-5 paralegal work is slow and error-prone</h2>
-          <p class="section-sub">Each petition means reviewing hundreds of pages manually, and one missed discrepancy can sink a filing.</p>
-        </div>
-        <ul class="problem-list">
-          <li>
-            <span class="problem-icon">📂</span>
-            <div class="problem-text">
-              <h4>Hundreds of pages per client</h4>
-              <p>Bank statements, tax returns, wire transfers, passports — often in multiple languages.</p>
-            </div>
-          </li>
-          <li>
-            <span class="problem-icon">🔍</span>
-            <div class="problem-text">
-              <h4>Manual fund tracing</h4>
-              <p>Tracing $800K+ from source to USCIS escrow means cross-referencing dozens of documents by hand.</p>
-            </div>
-          </li>
-          <li>
-            <span class="problem-icon">📝</span>
-            <div class="problem-text">
-              <h4>Memo drafting from scratch</h4>
-              <p>Source of Funds memos take hours to write — even with templates — because every fact must be cited.</p>
-            </div>
-          </li>
-          <li>
-            <span class="problem-icon">❌</span>
-            <div class="problem-text">
-              <h4>Easy to miss a document</h4>
-              <p>Forgetting one exhibit or one year of tax returns can trigger an RFE from USCIS, delaying the petition by months.</p>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <div class="section-header">
-          <div style="margin-bottom:12px"><span class="tag tag-green">✅ What ParaLex does</span></div>
-          <h2 class="section-title">Automates the review. Keeps you in control.</h2>
-          <p class="section-sub">ParaLex does the reading, checking, and first-draft writing. You review and file.</p>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="solution-card">
-            <div class="solution-icon-wrap" style="background:rgba(34,197,94,.12)">📖</div>
-            <div>
-              <h4>Reads all your documents</h4>
-              <p>Parses PDFs, scanned images (with OCR), Excel, Word — bank statements, tax returns, W-2s, passports, wire transfers.</p>
-            </div>
-          </div>
-          <div class="solution-card">
-            <div class="solution-icon-wrap" style="background:rgba(59,130,246,.12)">🔗</div>
-            <div>
-              <h4>Verifies source &amp; path of funds</h4>
-              <p>Checks that income sources are documented and traces the money from origin to the USCIS escrow investment.</p>
-            </div>
-          </div>
-          <div class="solution-card">
-            <div class="solution-icon-wrap" style="background:rgba(245,158,11,.12)">📋</div>
-            <div>
-              <h4>Shows exactly what's missing</h4>
-              <p>Runs a gap analysis against the USCIS EB-5 checklist and tells you which documents still need to be obtained.</p>
-            </div>
-          </div>
-          <div class="solution-card">
-            <div class="solution-icon-wrap" style="background:rgba(168,85,247,.12)">✍️</div>
-            <div>
-              <h4>Drafts the SOF memo for you</h4>
-              <p>Auto-writes a Source of Funds memorandum with every fact cited to a specific document and page number.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div style="text-align:center;margin-bottom:56px">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">From documents to USCIS-ready memo in 4 steps</h2>
     </div>
-  </div>
-</section>
-
-<!-- ── How it works ── -->
-<section class="section section-dark" id="how-it-works">
-  <div class="container">
-    <div class="section-header" style="text-align:center">
-      <span class="tag tag-gold" style="margin-bottom:14px;display:inline-flex">How it works</span>
-      <h2 class="section-title light">From documents to filed memo in 4 steps</h2>
-      <p class="section-sub light" style="margin:0 auto">An attorney can go from raw client documents to a USCIS-ready Source of Funds memo in under an hour.</p>
-    </div>
-
     <div class="steps">
       <div class="step">
-        <div class="step-num" style="background:rgba(245,166,35,.15);border-color:rgba(245,166,35,.4)">📁</div>
-        <h3>1. Create a Case</h3>
-        <p>Enter client name, investment amount, and whether it's a TEA project. Takes 30 seconds.</p>
+        <div class="step-num">1</div>
+        <h3>Create Case</h3>
+        <p>Enter client name, country of origin (India), investment amount, regional center, and attorney details.</p>
       </div>
       <div class="step">
-        <div class="step-num" style="background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4)">☁️</div>
-        <h3>2. Upload Documents</h3>
-        <p>Drag and drop everything — bank statements, tax returns, passports, wire transfers. ParaLex auto-classifies and indexes each one.</p>
+        <div class="step-num">2</div>
+        <h3>Upload Documents</h3>
+        <p>Drag & drop passport, I-94, I-797, 7 years of bank statements, W-2s, tax returns, all wire transfers, 401(k), stocks, Indian ITR.</p>
       </div>
       <div class="step">
-        <div class="step-num" style="background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4)">🔍</div>
-        <h3>3. Review the Analysis</h3>
-        <p>See the gap analysis (what's missing), ask questions about the funds, and verify the source of funds story.</p>
+        <div class="step-num">3</div>
+        <h3>Query & Analyze</h3>
+        <p>Ask questions about fund sources, wire totals, salary history. Run gap analysis to see exactly what's missing before filing.</p>
       </div>
       <div class="step">
-        <div class="step-num" style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4)">📄</div>
-        <h3>4. Draft &amp; Export Memo</h3>
-        <p>Click "Draft SOF Memo" — ParaLex writes the full memorandum with inline citations. Export to Markdown or Word.</p>
+        <div class="step-num">4</div>
+        <h3>Draft SOF Memo</h3>
+        <p>One click generates a complete USCIS memo with Exhibit A, B, C… references, fund tracing table showing each tranche, and inline page citations.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Feature deep dives ── -->
-<section class="section section-alt" id="features">
+<!-- ── DOCUMENT TABLE ─────────────────────────────────────────── -->
+<section class="section section-alt" id="documents">
   <div class="container">
-    <div class="section-header">
-      <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Features</span>
-      <h2 class="section-title">Everything an EB-5 paralegal does, automated</h2>
-      <p class="section-sub">Built around the USCIS EB-5 requirements and the documents attorneys actually receive.</p>
-    </div>
-
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🤖</div>
-        <h3>Auto-Document Classification</h3>
-        <p>Every uploaded file is automatically classified into the correct EB-5 category — no manual tagging needed.</p>
-        <div class="feature-tags">
-          <span class="f-tag">Bank Statement</span><span class="f-tag">W-2</span><span class="f-tag">Passport</span><span class="f-tag">Wire Transfer</span><span class="f-tag">401(k)</span>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">💬</div>
-        <h3>Grounded Q&amp;A Chat</h3>
-        <p>Ask any question about the case — "What's the total bank balance?" or "When was the wire sent?" — and get an answer with the exact source cited.</p>
-        <div class="feature-tags">
-          <span class="f-tag">Streaming answers</span><span class="f-tag">Page-level citations</span><span class="f-tag">No hallucination</span>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📋</div>
-        <h3>USCIS Gap Analysis</h3>
-        <p>Runs your document set against the full USCIS EB-5 checklist. Shows ✅ present, ❌ missing, and ⚠️ uncertain with specific notes per item.</p>
-        <div class="feature-tags">
-          <span class="f-tag">Completeness %</span><span class="f-tag">Priority actions</span><span class="f-tag">Red flags</span>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📝</div>
-        <h3>SOF Memo Drafting</h3>
-        <p>Generates a complete Source of Funds memorandum from your documents. Every sentence is backed by a citation like <em>[Chase Bank Statement, p.7]</em>.</p>
-        <div class="feature-tags">
-          <span class="f-tag">Inline citations</span><span class="f-tag">USCIS format</span><span class="f-tag">Export .md / .docx</span>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔎</div>
-        <h3>OCR for Scanned Docs</h3>
-        <p>Passports, bank stamps, hand-signed documents — anything scanned is run through Tesseract OCR and indexed just like digital PDFs.</p>
-        <div class="feature-tags">
-          <span class="f-tag">300 DPI rendering</span><span class="f-tag">Auto-preprocessing</span><span class="f-tag">Confidence scoring</span>
-        </div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔒</div>
-        <h3>100% Local &amp; Private</h3>
-        <p>Client documents never leave your machine. Embeddings are computed locally. The only external call is to the AI model API for analysis.</p>
-        <div class="feature-tags">
-          <span class="f-tag">On-premise</span><span class="f-tag">Docker</span><span class="f-tag">Local embeddings</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Screenshots ── -->
-<section class="section" id="screenshots">
-  <div class="container">
-    <div class="section-header" style="text-align:center;max-width:600px;margin:0 auto 52px">
-      <span class="tag tag-gold" style="margin-bottom:14px;display:inline-flex">UI Preview</span>
-      <h2 class="section-title">A purpose-built interface for EB-5 work</h2>
-    </div>
-    <div class="screenshots">
-
-      <!-- Screenshot 1: Document Manager -->
-      <div class="screenshot-row">
-        <div class="screenshot-text">
-          <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Step 1</span>
-          <h3>Upload &amp; auto-index every document</h3>
-          <p>Drag and drop a whole case folder. ParaLex reads each file, runs OCR on scanned pages, and classifies it automatically — <em>bank statement, W-2, passport, 401(k)</em> and more.</p>
-          <p>A green ✓ means it's been parsed, chunked, and indexed into the search engine. You can ask questions the moment indexing completes.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <span class="tag" style="background:rgba(34,197,94,.1);color:#16a34a;border-color:rgba(34,197,94,.2)">✅ PDF (digital)</span>
-            <span class="tag" style="background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.2)">🔎 Scanned OCR</span>
-            <span class="tag" style="background:rgba(245,158,11,.1);color:#b45309;border-color:rgba(245,158,11,.2)">📊 Excel / CSV</span>
-          </div>
-        </div>
-        <div class="screenshot-ui">
-          <div class="ui-header">
-            <span class="ui-header-title">📁 Documents — Chen Wei</span>
-            <span style="font-size:11px;color:var(--gray-400)">9 documents · 7 indexed</span>
-          </div>
-          <div class="ui-body">
-            <div class="doc-row">
-              <div class="doc-status-dot dot-green"></div>
-              <div class="doc-name">Passport_Chen_Wei.pdf</div>
-              <div class="doc-cat">Passport</div>
-              <div class="doc-pages">4 pp · OCR</div>
-            </div>
-            <div class="doc-row">
-              <div class="doc-status-dot dot-green"></div>
-              <div class="doc-name">ICBC_Bank_Statements_2022_2023.pdf</div>
-              <div class="doc-cat">Bank Statement</div>
-              <div class="doc-pages">48 pp</div>
-            </div>
-            <div class="doc-row">
-              <div class="doc-status-dot dot-green"></div>
-              <div class="doc-name">China_Tax_Returns_2019_2023.pdf</div>
-              <div class="doc-cat">Tax Return</div>
-              <div class="doc-pages">32 pp · OCR</div>
-            </div>
-            <div class="doc-row">
-              <div class="doc-status-dot dot-green"></div>
-              <div class="doc-name">Wire_Transfer_Escrow_Mar2024.pdf</div>
-              <div class="doc-cat">Wire Transfer</div>
-              <div class="doc-pages">2 pp</div>
-            </div>
-            <div class="doc-row">
-              <div class="doc-status-dot dot-green"></div>
-              <div class="doc-name">Stock_Portfolio_Schwab_2023.xlsx</div>
-              <div class="doc-cat">Stock Statement</div>
-              <div class="doc-pages">3 sheets</div>
-            </div>
-            <div class="doc-row">
-              <div class="doc-status-dot dot-spin" style="animation:blink 1.2s ease infinite"></div>
-              <div class="doc-name">Business_Sale_Agreement_2022.pdf</div>
-              <div class="doc-cat" style="background:rgba(59,130,246,.1);color:var(--blue)">Indexing…</div>
-              <div class="doc-pages">18 pp</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Screenshot 2: Chat -->
-      <div class="screenshot-row reverse">
-        <div class="screenshot-text">
-          <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Step 2</span>
-          <h3>Ask anything — get cited answers only</h3>
-          <p>The Q&amp;A is grounded <em>entirely</em> in the uploaded documents. Every answer includes the exact source — file name and page number. If the information isn't in the documents, ParaLex says so instead of guessing.</p>
-          <p>This protects the attorney: every fact in the conversation can be traced back to the document that supports it.</p>
-        </div>
-        <div class="screenshot-ui">
-          <div class="ui-header">
-            <span class="ui-header-title">💬 Q&amp;A Chat — Chen Wei</span>
-          </div>
-          <div class="ui-body">
-            <div class="chat-bubble chat-user">Where did the investment funds come from?</div>
-            <div class="chat-bubble chat-ai">
-              <div class="chat-ai-header">
-                <div class="chat-avatar">⚖️</div>
-                <span style="font-size:12px;font-weight:600;color:#374151">ParaLex</span>
-              </div>
-              The $850,000 investment came from three documented sources:<br/><br/>
-              <strong>1. Business sale proceeds</strong> — Chen Wei sold a 35% stake in Shenzhen Tech Co. for ¥4.2M (~$590K) in August 2022 <span class="cite-pill">Business_Sale_Agreement_2022.pdf, p.3</span><br/><br/>
-              <strong>2. Brokerage liquidation</strong> — $180K from Schwab stock sales in Q4 2023 <span class="cite-pill">Schwab_Portfolio_2023.xlsx, Sheet 2</span><br/><br/>
-              <strong>3. Accumulated savings</strong> — $80K from ICBC savings account as of Jan 2024 <span class="cite-pill">ICBC_Bank_Statements.pdf, p.12</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Screenshot 3: Gap Analysis -->
-      <div class="screenshot-row">
-        <div class="screenshot-text">
-          <span class="tag tag-gold" style="margin-bottom:14px;display:inline-flex">Step 3</span>
-          <h3>See exactly what USCIS will need</h3>
-          <p>The gap analysis compares the uploaded documents against the full USCIS EB-5 requirements checklist. It tells you what's covered, what's missing, and what needs clarification — before you file.</p>
-          <p>Priority actions and red flags are highlighted so attorneys know exactly what to request from the client next.</p>
-        </div>
-        <div class="screenshot-ui">
-          <div class="ui-header">
-            <span class="ui-header-title">📋 Gap Analysis — Chen Wei</span>
-            <span style="font-size:11px;padding:3px 10px;border-radius:999px;background:rgba(34,197,94,.1);color:#16a34a;font-weight:600">78% complete</span>
-          </div>
-          <div class="ui-body">
-            <div class="completeness-bar"><div class="completeness-fill" style="width:78%"></div></div>
-            <div style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:8px">SOURCE OF FUNDS</div>
-            <div class="gap-item">
-              <div class="gap-check">✅</div>
-              <div class="gap-label">5 Years Personal Tax Returns</div>
-              <div class="gap-file">China_Tax_Returns.pdf</div>
-            </div>
-            <div class="gap-item">
-              <div class="gap-check">✅</div>
-              <div class="gap-label">12 Months Bank Statements</div>
-              <div class="gap-file">ICBC_Statements.pdf</div>
-            </div>
-            <div class="gap-item">
-              <div class="gap-check">✅</div>
-              <div class="gap-label">Business Sale Documentation</div>
-              <div class="gap-file">Sale_Agreement_2022.pdf</div>
-            </div>
-            <div class="gap-item" style="background:rgba(239,68,68,.03)">
-              <div class="gap-check">❌</div>
-              <div class="gap-label" style="color:#dc2626;font-weight:500">Business Tax Returns (3 years)</div>
-              <div class="gap-file" style="color:#dc2626">MISSING</div>
-            </div>
-            <div class="gap-item" style="background:rgba(245,158,11,.03)">
-              <div class="gap-check">⚠️</div>
-              <div class="gap-label" style="color:#b45309">Bank statements only 8 months (need 12)</div>
-              <div class="gap-file" style="color:#b45309">INCOMPLETE</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Screenshot 4: Memo -->
-      <div class="screenshot-row reverse">
-        <div class="screenshot-text">
-          <span class="tag tag-green" style="margin-bottom:14px;display:inline-flex">Step 4</span>
-          <h3>Get a fully-cited SOF memo in one click</h3>
-          <p>ParaLex writes the complete Source of Funds memorandum — introduction, biographical background, source analysis, path of funds, conclusion, and exhibit list — formatted for USCIS submission.</p>
-          <p>Every single factual claim is cited to the document and page that supports it. Attorneys review, edit, and file. Export as Markdown or Word.</p>
-        </div>
-        <div class="screenshot-ui">
-          <div class="ui-header">
-            <span class="ui-header-title">📝 Source of Funds Memo — Chen Wei</span>
-            <span style="font-size:11px;color:var(--gray-400)">Draft · 12 citations</span>
-          </div>
-          <div class="ui-body">
-            <div class="memo-section">
-              <div class="memo-h2">MEMORANDUM</div>
-              <div class="memo-p">To: USCIS · From: [Attorney Name] · Re: Source of Funds — I-526E Petition of Chen Wei</div>
-            </div>
-            <div class="memo-section">
-              <div class="memo-h2">I. INTRODUCTION</div>
-              <div class="memo-p">The Petitioner, Chen Wei, is a national of the People's Republic of China seeking classification as an EB-5 immigrant investor. The Petitioner intends to invest $850,000 in a USCIS-designated Targeted Employment Area project...</div>
-            </div>
-            <div class="memo-section">
-              <div class="memo-h2">II. SOURCE OF FUNDS</div>
-              <div class="memo-p"><strong>A. Business Sale Proceeds.</strong> In August 2022, the Petitioner sold a 35% ownership stake in Shenzhen Technology Co., Ltd. for ¥4,200,000 RMB.</div>
-              <div class="memo-cite">Business Sale and Purchase Agreement dated August 14, 2022 [Business_Sale_Agreement_2022.pdf, p.3]</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ── Privacy ── -->
-<section class="privacy-strip">
-  <div class="container">
-    <div style="text-align:center;margin-bottom:40px">
-      <h2 style="font-size:28px;font-weight:800;color:var(--white)">Client data stays on your machine</h2>
-      <p style="color:rgba(255,255,255,.5);font-size:15px;margin-top:8px">Built for attorneys who handle sensitive financial documents</p>
-    </div>
-    <div class="privacy-grid">
-      <div class="privacy-item">
-        <div class="privacy-icon">🏠</div>
-        <div>
-          <h4>Self-hosted by design</h4>
-          <p>Runs on your laptop or firm server. No SaaS subscription. No documents sent to any cloud storage.</p>
-        </div>
-      </div>
-      <div class="privacy-item">
-        <div class="privacy-icon">🧠</div>
-        <div>
-          <h4>Local embeddings</h4>
-          <p>Document text is converted to search vectors by a model that runs locally on your machine — no API call for that step.</p>
-        </div>
-      </div>
-      <div class="privacy-item">
-        <div class="privacy-icon">🔑</div>
-        <div>
-          <h4>Your API key, your data</h4>
-          <p>ParaLex calls the AI model API using your own key. Document excerpts are sent for analysis only — not stored by the API provider beyond the call.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Install ── -->
-<section class="section section-alt" id="install">
-  <div class="container">
-    <div class="section-header">
-      <span class="tag tag-blue" style="margin-bottom:14px;display:inline-flex">Get started</span>
-      <h2 class="section-title">Up and running in under 10 minutes</h2>
-      <p class="section-sub">No cloud account needed. Just Python, Node.js, and an API key.</p>
-    </div>
-
-    <div class="install-grid">
+    <div class="two-col">
       <div>
-        <div class="install-steps">
-          <div class="install-step">
-            <div class="step-num-sm">1</div>
-            <div>
-              <h4>Clone the repo</h4>
-              <div class="code-block">git clone https://github.com/Abhinav-N01/paralex<br/>cd paralex</div>
-            </div>
-          </div>
-          <div class="install-step">
-            <div class="step-num-sm">2</div>
-            <div>
-              <h4>Add your Anthropic API key</h4>
-              <p>Get a key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a></p>
-              <div class="code-block">cp backend/.env.example backend/.env<br/><span class="dim"># Edit backend/.env:</span><br/><span class="gold">ANTHROPIC_API_KEY</span>=<span class="green">sk-ant-your-key-here</span></div>
-            </div>
-          </div>
-          <div class="install-step">
-            <div class="step-num-sm">3</div>
-            <div>
-              <h4>Install Tesseract OCR (for scanned docs)</h4>
-              <div class="code-block"><span class="dim"># macOS</span><br/>brew install tesseract<br/><br/><span class="dim"># Ubuntu / Debian</span><br/>sudo apt install tesseract-ocr</div>
-            </div>
-          </div>
-          <div class="install-step">
-            <div class="step-num-sm">4</div>
-            <div>
-              <h4>Start the app</h4>
-              <div class="code-block">./start-dev.sh</div>
-              <p style="font-size:13px;color:var(--gray-500);margin-top:8px">Or with Docker: <code style="background:var(--gray-200);padding:2px 6px;border-radius:4px;font-size:12px">docker compose up --build</code></p>
-            </div>
-          </div>
+        <p class="section-label">Document Requirements</p>
+        <h2 class="section-title" style="font-size:32px">Every document ParaLex handles</h2>
+        <p class="section-sub" style="margin-bottom:20px">Optimized for Indian nationals on H-1B visa filing EB-5. Handles both US documents and Indian documents including PAN card, ITR, Form 16, and statements from HDFC, SBI, ICICI, and other Indian banks.</p>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:16px;margin-bottom:16px">
+          <p style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px">⚠️ 7-Year Bank Statement Rule</p>
+          <p style="font-size:13px;color:#b45309">USCIS requires 7 consecutive years of monthly statements for <em>every</em> bank account — both US and foreign. Missing even a single month may trigger an RFE (Request for Evidence) that delays the petition by 12+ months.</p>
+        </div>
+        <div style="background:#dbeafe;border:1px solid #bfdbfe;border-radius:10px;padding:16px">
+          <p style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px">🇮🇳 For Indian Investors</p>
+          <p style="font-size:13px;color:#1e40af">Also upload: PAN card · Indian ITR (Income Tax Returns) · Form 16 (from employer) · HDFC/SBI/ICICI bank statements · Any foreign account transactions used to fund the investment</p>
         </div>
       </div>
-
-      <div style="display:flex;flex-direction:column;gap:20px">
-        <div class="req-card">
-          <h3>Requirements</h3>
-          <div class="req-item">
-            <span>🐍</span> Python 3.11+ <span class="req-badge req-req">Required</span>
-          </div>
-          <div class="req-item">
-            <span>⬢</span> Node.js 20+ <span class="req-badge req-req">Required</span>
-          </div>
-          <div class="req-item">
-            <span>🔑</span> Anthropic API key <span class="req-badge req-req">Required</span>
-          </div>
-          <div class="req-item">
-            <span>🔎</span> Tesseract OCR <span class="req-badge req-opt">For OCR</span>
-          </div>
-          <div class="req-item">
-            <span>🐳</span> Docker <span class="req-badge req-opt">For Docker deploy</span>
-          </div>
-        </div>
-
-        <div class="req-card" style="background:var(--navy);border-color:rgba(255,255,255,.1)">
-          <h3 style="color:var(--white)">Or use Docker (one command)</h3>
-          <div class="code-block" style="background:rgba(255,255,255,.05);color:#a5f3fc">
-            <span class="dim"># Copy and set your API key</span><br/>
-            cp .env.example .env<br/><br/>
-            <span class="dim"># Build and start</span><br/>
-            docker compose up --build -d<br/><br/>
-            <span class="green"># → http://localhost:3000 ✓</span>
-          </div>
+      <div>
+        <div style="background:var(--white);border:1px solid var(--s200);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)">
+          <table class="req-table">
+            <thead><tr><th>Document</th><th>Yrs Required</th><th>Type</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Passport</strong> (biographic page)</td><td class="req-yrs">Current</td><td><span class="req-tag rb">Bio</span></td></tr>
+              <tr><td><strong>I-94</strong> arrival/departure printout</td><td class="req-yrs">Current</td><td><span class="req-tag rb">Bio</span></td></tr>
+              <tr><td><strong>H-1B/L-1 visa stamps</strong></td><td class="req-yrs">All</td><td><span class="req-tag rb">Bio</span></td></tr>
+              <tr><td><strong>I-797 approval notice</strong></td><td class="req-yrs">All</td><td><span class="req-tag rb">Bio</span></td></tr>
+              <tr><td><strong>Bank statements — all accounts</strong></td><td class="req-yrs">7 years</td><td><span class="req-tag rg">Financial</span></td></tr>
+              <tr><td><strong>W-2 forms</strong></td><td class="req-yrs">5 years</td><td><span class="req-tag rg">Financial</span></td></tr>
+              <tr><td><strong>Federal tax returns</strong></td><td class="req-yrs">5 years</td><td><span class="req-tag rg">Financial</span></td></tr>
+              <tr><td><strong>Pay stubs</strong></td><td class="req-yrs">3 months</td><td><span class="req-tag rg">Financial</span></td></tr>
+              <tr><td><strong>401(k) / retirement statements</strong></td><td class="req-yrs">Current</td><td><span class="req-tag rg">Financial</span></td></tr>
+              <tr><td><strong>Brokerage / stock statements</strong></td><td class="req-yrs">Current</td><td><span class="req-tag rg">Financial</span></td></tr>
+              <tr><td><strong>Wire transfer records</strong> (all tranches)</td><td class="req-yrs">All</td><td><span class="req-tag ra">Path of Funds</span></td></tr>
+              <tr><td><strong>Indian ITR / Form 16 / PAN</strong></td><td class="req-yrs">5 years</td><td><span class="req-tag rg">Financial</span></td></tr>
+              <tr><td><strong>Escrow / subscription agreement</strong></td><td class="req-yrs">Current</td><td><span class="req-tag ra">Path of Funds</span></td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Tech Stack ── -->
+<!-- ── FEATURES ───────────────────────────────────────────────── -->
+<section class="section section-dark" id="features">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:52px">
+      <p class="section-label">Features</p>
+      <h2 class="section-title">Everything an EB-5 attorney needs</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">🤖</div><h3>Agentic RAG — Zero Hallucination</h3><p>Every answer, every memo fact is retrieved directly from uploaded documents. If it's not in the docs, ParaLex says so.</p></div>
+      <div class="feat-card"><div class="feat-icon">💬</div><h3>Document Q&A with Citations</h3><p>Ask anything. Get answers citing the exact document, exhibit letter, and page number. Full chat history exportable.</p></div>
+      <div class="feat-card"><div class="feat-icon">📋</div><h3>USCIS Gap Analysis</h3><p>Runs the full I-526E checklist. Shows what's present, missing, and uncertain. Flags incomplete bank statement coverage (7-year rule).</p></div>
+      <div class="feat-card"><div class="feat-icon">📝</div><h3>Auto SOF Memo Drafting</h3><p>Generates complete Source of Funds memos with USCIS exhibit format, fund tracing table per tranche, and inline page citations.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔗</div><h3>Path of Funds Tracing</h3><p>Traces funds from paycheck → bank account → 401(k) rollover → wire transfer → escrow. Every step cited to documents.</p></div>
+      <div class="feat-card"><div class="feat-icon">💸</div><h3>Installment / Tranche Tracking</h3><p>Handles multi-tranche investments — tracks each wire, verifies amounts add up to the TEA or Standard minimum, generates a tracing table.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔒</div><h3>100% Local & Private</h3><p>Embeddings computed locally (BGE-small). ChromaDB stores on your machine. Only document excerpts sent to Claude API — never your raw files.</p></div>
+      <div class="feat-card"><div class="feat-icon">🇮🇳</div><h3>Indian Investor Optimized</h3><p>Handles PAN cards, ITR, Form 16, HDFC/SBI/ICICI statements, INR→USD conversion docs, H-1B/I-797 visa status documents.</p></div>
+      <div class="feat-card"><div class="feat-icon">📎</div><h3>Auto Exhibit Assignment</h3><p>Biographical docs first (Passport, I-94, I-797), then financial. Every document gets an exhibit letter. Consistent across all generated memos.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INSTALL ─────────────────────────────────────────────────── -->
+<section class="section" id="install">
+  <div class="container" style="max-width:720px">
+    <div style="text-align:center;margin-bottom:44px">
+      <p class="section-label">Get Started</p>
+      <h2 class="section-title">Run locally in 3 steps</h2>
+      <p style="color:var(--s500);font-size:15px">Requires Python 3.9+, Node 18+, and an Anthropic API key.<br/>Everything else installs automatically.</p>
+    </div>
+    <div style="display:grid;gap:16px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--s500);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">1 — Clone</div>
+        <div class="code-block"><span class="t">git</span> clone https://github.com/Abhinav-N01/paralex<br/><span class="t">cd</span> paralex</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--s500);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">2 — Add API Key</div>
+        <div class="code-block"><span class="t">cp</span> backend/.env.example backend/.env<br/><span class="s"># Edit backend/.env and paste your key:</span><br/>ANTHROPIC_API_KEY=sk-ant-...</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--s500);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">3 — Start</div>
+        <div class="code-block"><span class="t">./start-dev.sh</span><br/><br/><span class="s"># Open in your browser:</span><br/>App → http://localhost:3000<br/>API → http://localhost:8000/api/docs</div>
+      </div>
+    </div>
+    <div style="margin-top:24px;background:var(--s50);border:1px solid var(--s200);border-radius:10px;padding:16px;text-align:center">
+      <p style="font-size:13px;color:var(--s600)">Optional: install Tesseract OCR for scanned documents<br/>
+      macOS: <code style="background:var(--s200);padding:1px 6px;border-radius:4px;font-family:monospace">brew install tesseract</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── TECH ───────────────────────────────────────────────────── -->
 <section class="section section-dark">
   <div class="container">
-    <div class="section-header" style="text-align:center">
-      <h2 class="section-title light">Built on proven open-source tools</h2>
-      <p class="section-sub light" style="margin:0 auto">No proprietary lock-in. Swap any component to fit your infrastructure.</p>
+    <div style="text-align:center;margin-bottom:40px">
+      <p class="section-label">Tech Stack</p>
+      <h2 class="section-title" style="font-size:28px">Built on proven open-source</h2>
     </div>
-    <div class="stack-grid">
-      <div class="stack-item"><div class="si">⚡</div><h4>FastAPI</h4><p>Python async backend</p></div>
-      <div class="stack-item"><div class="si">⚛️</div><h4>Next.js 15</h4><p>React frontend</p></div>
-      <div class="stack-item"><div class="si">🧠</div><h4>Claude Sonnet</h4><p>Anthropic LLM</p></div>
-      <div class="stack-item"><div class="si">🔍</div><h4>ChromaDB</h4><p>Local vector store</p></div>
-      <div class="stack-item"><div class="si">📐</div><h4>BGE Embeddings</h4><p>Local — no API</p></div>
-      <div class="stack-item"><div class="si">📄</div><h4>Tesseract OCR</h4><p>Open source OCR</p></div>
-      <div class="stack-item"><div class="si">🗄️</div><h4>SQLite</h4><p>Zero-config database</p></div>
-      <div class="stack-item"><div class="si">🐳</div><h4>Docker</h4><p>One-command deploy</p></div>
+    <div class="tech-grid">
+      <div class="tech-item"><strong>FastAPI</strong><span>Python async backend</span></div>
+      <div class="tech-item"><strong>Next.js 15</strong><span>React frontend</span></div>
+      <div class="tech-item"><strong>ChromaDB</strong><span>Local vector store</span></div>
+      <div class="tech-item"><strong>BGE-small</strong><span>Local embeddings — no API</span></div>
+      <div class="tech-item"><strong>Claude Sonnet 4.6</strong><span>Anthropic LLM</span></div>
+      <div class="tech-item"><strong>SQLite</strong><span>Case & document database</span></div>
+      <div class="tech-item"><strong>Tesseract OCR</strong><span>Scanned doc support</span></div>
+      <div class="tech-item"><strong>PyMuPDF + pdfplumber</strong><span>PDF text extraction</span></div>
     </div>
   </div>
 </section>
 
-<!-- ── Footer ── -->
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
 <footer>
-  <div class="container">
-    <div class="footer-links">
-      <a href="https://github.com/Abhinav-N01/paralex" target="_blank">GitHub</a>
-      <a href="https://github.com/Abhinav-N01/paralex/issues" target="_blank">Issues</a>
-      <a href="https://github.com/Abhinav-N01/paralex/blob/main/README.md" target="_blank">Docs</a>
-      <a href="https://github.com/Abhinav-N01/paralex/blob/main/LICENSE" target="_blank">License</a>
+  <div class="footer-inner">
+    <div class="logo">
+      <div class="logo-icon">⚖️</div>
+      <div>
+        <div class="logo-name" style="font-size:16px">ParaLex</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.3)">EB-5 AI Paralegal Platform · MIT License</div>
+      </div>
     </div>
-    <p>
-      ParaLex is open source software. Not legal advice. Not affiliated with USCIS or any government agency.<br/>
-      Built to help EB-5 attorneys work faster — the attorney always reviews and files.
-    </p>
+    <div class="footer-links">
+      <a href="https://github.com/Abhinav-N01/paralex" target="_blank" class="footer-link">GitHub</a>
+      <a href="https://github.com/Abhinav-N01/paralex/issues" target="_blank" class="footer-link">Issues</a>
+      <a href="https://github.com/Abhinav-N01/paralex/blob/main/README.md" target="_blank" class="footer-link">Docs</a>
+      <a href="https://github.com/Abhinav-N01/paralex/blob/main/LICENSE" target="_blank" class="footer-link">License</a>
+    </div>
   </div>
 </footer>
 
 <script>
-  // Smooth anchor scroll with offset for sticky nav
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        window.scrollTo({ top: target.offsetTop - 64, behavior: 'smooth' });
-      }
-    });
-  });
+function showTab(tab, el) {
+  // Hide all panels
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.atab').forEach(t => t.classList.remove('active'));
+  // Show selected
+  document.getElementById('tab-' + tab).classList.add('active');
+  el.classList.add('active');
+}
 </script>
 </body>
 </html>
